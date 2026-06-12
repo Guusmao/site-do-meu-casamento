@@ -1,5 +1,12 @@
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+// Conexão com o Supabase
+const supabaseUrl = 'https://faccbfidybfsoplaeqjw.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhY2NiZmlkeWJmc29wbGFlcWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTY4ODYsImV4cCI6MjA5Njc5Mjg4Nn0.SNPbyvdHeICpuswamoUeJ-bAUtMosv7RvlVoxYyOTc8';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Inicializa os ícones da biblioteca Lucide
     lucide.createIcons();
 
@@ -211,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.textContent = 'Selecionado';
 
                 selectedGift = { name: itemName, value: amount };
-                
+
                 // Exibe o banner com o presente selecionado
                 selectedGiftName.textContent = itemName;
                 selectedGiftValue.textContent = `R$ ${parseFloat(amount).toFixed(2).replace('.', ',')}`;
@@ -257,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ==========================================================================
-       6. FORMULÁRIO DE CONFIRMAÇÃO DE PRESENÇA (RSVP)
+       6. FORMULÁRIO DE CONFIRMAÇÃO DE PRESENÇA (RSVP) — INTEGRADO COM SUPABASE
        ========================================================================== */
     const rsvpForm = document.getElementById('rsvpForm');
     const rsvpFormContainer = document.getElementById('rsvpFormContainer');
@@ -272,14 +279,14 @@ document.addEventListener('DOMContentLoaded', () => {
     rsvpAttending.addEventListener('change', () => {
         if (rsvpAttending.value === 'no') {
             guestsGroup.classList.add('hidden');
-            rsvpGuests.value = '0'; // reset
+            rsvpGuests.value = '0';
         } else {
             guestsGroup.classList.remove('hidden');
         }
     });
 
     // Adiciona ou remove a classe de erro no campo do formulário
-    const toggleInputError = (input, isValid, errorEl) => {
+    const toggleInputError = (input, isValid) => {
         const group = input.closest('.form-group');
         if (isValid) {
             group.classList.remove('error');
@@ -294,12 +301,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return re.test(String(email).toLowerCase());
     };
 
-    rsvpForm.addEventListener('submit', (e) => {
+    rsvpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const nameInput = document.getElementById('rsvpName');
         const emailInput = document.getElementById('rsvpEmail');
         const attendingSelect = document.getElementById('rsvpAttending');
+        const submitBtn = document.getElementById('rsvpSubmitBtn');
 
         // Verifica se os campos obrigatórios são válidos
         const isNameValid = nameInput.value.trim().length > 2;
@@ -311,35 +319,44 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleInputError(attendingSelect, isAttendingValid);
 
         if (isNameValid && isEmailValid && isAttendingValid) {
+            // Desabilita o botão para evitar envios duplicados
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
             // Coleta os dados do formulário
             const guestResponse = {
-                name: nameInput.value.trim(),
+                nome: nameInput.value.trim(),
                 email: emailInput.value.trim(),
-                attending: attendingSelect.value,
-                guests: attendingSelect.value === 'yes' ? parseInt(rsvpGuests.value) : 0,
-                message: document.getElementById('rsvpMessage').value.trim(),
-                timestamp: new Date().getTime()
+                comparecendo: attendingSelect.value,
+                acompanhantes: attendingSelect.value === 'yes' ? parseInt(rsvpGuests.value) : 0,
+                mensagem: document.getElementById('rsvpMessage').value.trim()
             };
 
-            // Salva a confirmação no armazenamento local do navegador
-            let rsvpList = JSON.parse(localStorage.getItem('rsvp_confirmations')) || [];
-            // Remove resposta anterior do mesmo e-mail para evitar duplicatas
-            rsvpList = rsvpList.filter(item => item.email.toLowerCase() !== guestResponse.email.toLowerCase());
-            rsvpList.push(guestResponse);
-            localStorage.setItem('rsvp_confirmations', JSON.stringify(rsvpList));
+            // Salva no Supabase — substitui caso o e-mail já exista
+            const { error } = await supabase
+                .from('confirmacoes')
+                .upsert(guestResponse, { onConflict: 'email' });
+
+            if (error) {
+                console.error('Erro ao salvar confirmação:', error);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Confirmar Presença';
+                alert('Ocorreu um erro ao confirmar sua presença. Tente novamente.');
+                return;
+            }
 
             // Exibe a mensagem de sucesso após o envio
             rsvpFormContainer.style.display = 'none';
             rsvpSuccessContainer.classList.add('active');
 
             // Monta a mensagem de confirmação personalizada
-            if (guestResponse.attending === 'yes') {
-                const companionText = guestResponse.guests === 0 
-                    ? 'Apenas você.' 
-                    : `Você e + ${guestResponse.guests} acompanhante(s).`;
-                rsvpSuccessMessage.innerHTML = `Que alegria, <strong>${guestResponse.name}</strong>! Sua presença está confirmada com sucesso.<br><br>Detalhe dos convidados: <em>${companionText}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`;
+            if (guestResponse.comparecendo === 'yes') {
+                const companionText = guestResponse.acompanhantes === 0
+                    ? 'Apenas você.'
+                    : `Você e + ${guestResponse.acompanhantes} acompanhante(s).`;
+                rsvpSuccessMessage.innerHTML = `Que alegria, <strong>${guestResponse.nome}</strong>! Sua presença está confirmada com sucesso.<br><br>Detalhe dos convidados: <em>${companionText}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`;
             } else {
-                rsvpSuccessMessage.innerHTML = `Obrigado por nos avisar, <strong>${guestResponse.name}</strong>. Sentiremos a sua falta no nosso grande dia, mas agradecemos imensamente o seu carinho e votos de felicidade!`;
+                rsvpSuccessMessage.innerHTML = `Obrigado por nos avisar, <strong>${guestResponse.nome}</strong>. Sentiremos a sua falta no nosso grande dia, mas agradecemos imensamente o seu carinho e votos de felicidade!`;
             }
         }
     });
@@ -348,66 +365,23 @@ document.addEventListener('DOMContentLoaded', () => {
     rsvpEditBtn.addEventListener('click', () => {
         rsvpSuccessContainer.classList.remove('active');
         rsvpFormContainer.style.display = 'block';
-
-        // Preenche o formulário com os dados já salvos
-        const rsvpList = JSON.parse(localStorage.getItem('rsvp_confirmations')) || [];
-        if (rsvpList.length > 0) {
-            const lastRsvp = rsvpList[rsvpList.length - 1];
-            document.getElementById('rsvpName').value = lastRsvp.name;
-            document.getElementById('rsvpEmail').value = lastRsvp.email;
-            document.getElementById('rsvpAttending').value = lastRsvp.attending;
-            
-            if (lastRsvp.attending === 'no') {
-                guestsGroup.classList.add('hidden');
-                rsvpGuests.value = '0';
-            } else {
-                guestsGroup.classList.remove('hidden');
-                rsvpGuests.value = String(lastRsvp.guests);
-            }
-            document.getElementById('rsvpMessage').value = lastRsvp.message;
-        }
+        const submitBtn = document.getElementById('rsvpSubmitBtn');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Confirmar Presença <i data-lucide="send" class="btn-icon-right"></i>';
+        lucide.createIcons();
     });
 
     /* ==========================================================================
-       7. MURAL DE RECADOS
+       7. MURAL DE RECADOS — INTEGRADO COM SUPABASE
        ========================================================================== */
     const guestbookForm = document.getElementById('guestbookForm');
     const guestbookMessagesContainer = document.getElementById('guestbookMessages');
 
-    // Mensagens padrão exibidas antes de qualquer convidado escrever
-    const defaultMessages = [
-        {
-            name: "Sofia e Bruno (Padrinhos)",
-            message: "Casal maravilhoso! Que a cumplicidade de vocês continue crescendo a cada dia. O site ficou lindo, já confirmamos presença! Beijos!",
-            timestamp: new Date().getTime() - (4 * 60 * 60 * 1000) // 4 horas atrás
-        },
-        {
-            name: "Lucas P. (Amigo de infância)",
-            message: "Que alegria ver vocês dando esse passo! O Felipe finalmente tomou juízo haha. Brincadeiras à parte, vocês merecem toda a felicidade do mundo. Vai ser a festa do ano!",
-            timestamp: new Date().getTime() - (24 * 60 * 60 * 1000) // 1 dia atrás
-        },
-        {
-            name: "Tia Regina",
-            message: "Meus afilhados lindos, que Deus abençoe imensamente essa união. Estou contando os dias para ver a Sarah de noiva! Amo vocês!",
-            timestamp: new Date().getTime() - (2 * 24 * 60 * 60 * 1000) // 2 dias atrás
-        }
-    ];
-
-    const getMessages = () => {
-        let list = localStorage.getItem('guestbook_messages');
-        if (!list) {
-            // Salva as mensagens padrão na primeira vez que a página é aberta
-            localStorage.setItem('guestbook_messages', JSON.stringify(defaultMessages));
-            return defaultMessages;
-        }
-        return JSON.parse(list);
-    };
-
     // Formata o tempo relativo (ex: "Há 2 dias", "Agora mesmo")
     const formatRelativeTime = (timestamp) => {
         const now = new Date().getTime();
-        const diff = now - timestamp;
-        
+        const diff = now - new Date(timestamp).getTime();
+
         const seconds = Math.floor(diff / 1000);
         const minutes = Math.floor(seconds / 60);
         const hours = Math.floor(minutes / 60);
@@ -424,33 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Renderiza a lista de mensagens do mural
-    const renderMessages = () => {
-        const messages = getMessages();
-        // Ordena as mensagens da mais recente para a mais antiga
-        messages.sort((a, b) => b.timestamp - a.timestamp);
-
-        guestbookMessagesContainer.innerHTML = '';
-
-        if (messages.length === 0) {
-            guestbookMessagesContainer.innerHTML = '<p class="no-messages" style="text-align: center; color: var(--color-text-muted); font-style: italic; margin-top: 30px;">Seja o primeiro a deixar um recado!</p>';
-            return;
-        }
-
-        messages.forEach(msg => {
-            const card = document.createElement('div');
-            card.className = 'message-card';
-            card.innerHTML = `
-                <div class="message-header">
-                    <span class="message-author">${escapeHTML(msg.name)}</span>
-                    <span class="message-date">${formatRelativeTime(msg.timestamp)}</span>
-                </div>
-                <p class="message-body">${escapeHTML(msg.message)}</p>
-            `;
-            guestbookMessagesContainer.appendChild(card);
-        });
-    };
-
     // Escapa caracteres especiais para evitar ataques XSS
     const escapeHTML = (str) => {
         return str
@@ -461,12 +408,51 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, "&#039;");
     };
 
+    // Renderiza a lista de mensagens do mural
+    const renderMessages = (messages) => {
+        guestbookMessagesContainer.innerHTML = '';
+
+        if (!messages || messages.length === 0) {
+            guestbookMessagesContainer.innerHTML = '<p class="no-messages" style="text-align: center; color: var(--color-text-muted); font-style: italic; margin-top: 30px;">Seja o primeiro a deixar um recado!</p>';
+            return;
+        }
+
+        messages.forEach(msg => {
+            const card = document.createElement('div');
+            card.className = 'message-card';
+            card.innerHTML = `
+                <div class="message-header">
+                    <span class="message-author">${escapeHTML(msg.nome)}</span>
+                    <span class="message-date">${formatRelativeTime(msg.criado_em)}</span>
+                </div>
+                <p class="message-body">${escapeHTML(msg.mensagem)}</p>
+            `;
+            guestbookMessagesContainer.appendChild(card);
+        });
+    };
+
+    // Busca as mensagens do Supabase e exibe na tela
+    const loadMessages = async () => {
+        const { data, error } = await supabase
+            .from('recados')
+            .select('*')
+            .order('criado_em', { ascending: false });
+
+        if (error) {
+            console.error('Erro ao carregar recados:', error);
+            return;
+        }
+
+        renderMessages(data);
+    };
+
     // Envia o recado ao submeter o formulário
-    guestbookForm.addEventListener('submit', (e) => {
+    guestbookForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const nameInput = document.getElementById('gbName');
         const messageInput = document.getElementById('gbMessage');
+        const submitBtn = document.getElementById('gbSubmitBtn');
 
         const isNameValid = nameInput.value.trim().length > 1;
         const isMsgValid = messageInput.value.trim().length > 2;
@@ -475,32 +461,42 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleInputError(messageInput, isMsgValid);
 
         if (isNameValid && isMsgValid) {
-            const newMsg = {
-                name: nameInput.value.trim(),
-                message: messageInput.value.trim(),
-                timestamp: new Date().getTime()
-            };
+            // Desabilita o botão para evitar envios duplicados
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
 
-            const messages = getMessages();
-            messages.push(newMsg);
-            localStorage.setItem('guestbook_messages', JSON.stringify(messages));
+            // Salva o recado no Supabase
+            const { error } = await supabase
+                .from('recados')
+                .insert({
+                    nome: nameInput.value.trim(),
+                    mensagem: messageInput.value.trim()
+                });
+
+            if (error) {
+                console.error('Erro ao salvar recado:', error);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Publicar Recado';
+                alert('Ocorreu um erro ao publicar o recado. Tente novamente.');
+                return;
+            }
 
             // Limpa os campos e remove as marcações de erro
             guestbookForm.reset();
             nameInput.closest('.form-group').classList.remove('error');
             messageInput.closest('.form-group').classList.remove('error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Publicar Recado <i data-lucide="message-square-heart" class="btn-icon-right"></i>';
+            lucide.createIcons();
 
             // Atualiza a lista de mensagens na tela
-            renderMessages();
+            await loadMessages();
 
             // Rola o mural para o topo para mostrar a nova mensagem
-            guestbookMessagesContainer.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            guestbookMessagesContainer.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });
 
     // Carrega as mensagens ao abrir a página
-    renderMessages();
+    loadMessages();
 });
