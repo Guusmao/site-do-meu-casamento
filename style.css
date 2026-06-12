@@ -1,8 +1,30 @@
+/*
+==================================================
+ÍNDICE DO ARQUIVO
+==================================================
+1. Variáveis e Sistema de Design
+2. Reset e Estilos Base
+3. Tipografia
+4. Componentes de Layout
+5. Barra de Navegação
+6. Seção Hero (Capa)
+7. Nossa História
+8. Detalhes do Evento
+9. Galeria
+10. Lista de Presentes
+11. Confirmação de Presença (RSVP)
+12. Mural de Recados
+13. Rodapé
+14. Animações
+15. Responsividade
+==================================================
+*/
+
 /* ==========================================================================
-   VARIABLES & DESIGN SYSTEM
+   VARIÁVEIS E SISTEMA DE DESIGN
    ========================================================================== */
 :root {
-    /* Color Palette */
+    /* Paleta de Cores */
     --color-bg: #FAF7F2;
     --color-primary: #5C3D46;      /* Vino / Dusty Rose */
     --color-primary-light: #7D5761;
@@ -12,23 +34,23 @@
     --color-text-muted: #736B67;
     --color-white: #FFFFFF;
     
-    /* Card Glassmorphism & Translucencies */
+    /* Fundo dos cards com efeito de vidro */
     --color-card-bg: rgba(255, 255, 255, 0.75);
     --color-card-border: rgba(255, 255, 255, 0.45);
     --color-card-shadow: rgba(92, 61, 70, 0.06);
     
-    /* Fonts */
+    /* Fontes */
     --font-serif: 'Playfair Display', Georgia, serif;
     --font-sans: 'Inter', sans-serif;
     
-    /* Borders & Spacing */
+    /* Bordas e Espaçamentos */
     --radius-sm: 6px;
     --radius-md: 12px;
     --radius-lg: 24px;
     --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     --transition-quick: all 0.2s ease;
     
-    /* Z-Index Hierarchy */
+    /* Hierarquia de camadas (quem fica na frente) */
     --z-back: -1;
     --z-normal: 1;
     --z-nav: 100;
@@ -36,7 +58,7 @@
 }
 
 /* ==========================================================================
-   RESET & BASE STYLES
+   RESET E ESTILOS BASE
    ========================================================================== */
 *, *::before, *::after {
     box-sizing: border-box;
@@ -83,7 +105,7 @@ button {
 }
 
 /* ==========================================================================
-   TYPOGRAPHY
+   TIPOGRAFIA
    ========================================================================== */
 h1, h2, h3, h4 {
     font-family: var(--font-serif);
@@ -96,7 +118,7 @@ p {
 }
 
 /* ==========================================================================
-   LAYOUT COMPONENTS (Containers, Buttons)
+   COMPONENTES DE LAYOUT (CONTAINERS E BOTÕES)
    ========================================================================== */
 .container {
     width: 100%;
@@ -215,7 +237,7 @@ p {
 }
 
 /* ==========================================================================
-   NAVIGATION BAR
+   BARRA DE NAVEGAÇÃO
    ========================================================================== */
 .navbar-container {
     position: fixed;
@@ -315,7 +337,7 @@ p {
 }
 
 /* ==========================================================================
-   HERO SECTION
+   SEÇÃO HERO (CAPA)
    ========================================================================== */
 .hero-section {
     position: relative;
@@ -461,7 +483,7 @@ p {
 }
 
 /* ==========================================================================
-   STORY SECTION
+   SEÇÃO NOSSA HISTÓRIA
    ========================================================================== */
 .story-section {
     padding: 100px 0;
@@ -533,7 +555,7 @@ p {
 }
 
 /* ==========================================================================
-   EVENT DETAILS SECTION
+   SEÇÃO DETALHES DO EVENTO
    ========================================================================== */
 .details-section {
     padding: 100px 0;
@@ -720,7 +742,7 @@ p {
 }
 
 /* ==========================================================================
-   GALLERY SECTION
+   SEÇÃO GALERIA
    ========================================================================== */
 .gallery-section {
     padding: 100px 0;
@@ -864,7 +886,7 @@ p {
 .lightbox-nav.next { right: 40px; }
 
 /* ==========================================================================
-   GIFT REGISTRY SECTION
+   SEÇÃO LISTA DE PRESENTES
    ========================================================================== */
 .registry-section {
     padding: 100px 0;
@@ -1159,7 +1181,7 @@ p {
 }
 
 /* ==========================================================================
-   RSVP SECTION
+   SEÇÃO CONFIRMAÇÃO DE PRESENÇA
    ========================================================================== */
 .rsvp-section {
     padding: 100px 0;
@@ -1366,7 +1388,7 @@ p {
     gap: 20px;
 }
 
-/* Scrollbar Customization */
+/* Estilo personalizado da barra de rolagem */
 .guestbook-messages::-webkit-scrollbar {
     width: 6px;
 }
@@ -1415,7 +1437,7 @@ p {
 }
 
 /* ==========================================================================
-   FOOTER
+   RODAPÉ
    ========================================================================== */
 .footer-container {
     background-color: var(--color-primary);
@@ -1476,7 +1498,7 @@ p {
 }
 
 /* ==========================================================================
-   SCROLL REVEAL & KEYFRAME ANIMATIONS
+   ANIMAÇÕES E EFEITOS DE ROLAGEM
    ========================================================================== */
 .scroll-reveal {
     opacity: 0;
@@ -1541,10 +1563,10 @@ p {
 }
 
 /* ==========================================================================
-   RESPONSIVE DESIGN (Media Queries)
+   RESPONSIVIDADE (MEDIA QUERIES)
    ========================================================================== */
 
-/* Large Tablets and Laptops */
+/* Telas grandes: tablets e notebooks */
 @media (max-width: 1024px) {
     .hero-title {
         font-size: 4rem;
