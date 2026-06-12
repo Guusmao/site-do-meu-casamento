@@ -1,17 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Initialize Lucide Icons
+    // Inicializa os ícones da biblioteca Lucide
     lucide.createIcons();
 
     /* ==========================================================================
-       1. NAVIGATION AND HEADER
+       1. NAVEGAÇÃO E CABEÇALHO
        ========================================================================== */
     const navbar = document.querySelector('.navbar-container');
     const menuToggle = document.getElementById('menuToggle');
     const navLinksContainer = document.getElementById('navLinks');
     const navLinks = document.querySelectorAll('.nav-link');
 
-    // Scroll effect for navbar
+    // Adiciona classe ao menu quando o usuário rola a página
     window.addEventListener('scroll', () => {
         if (window.scrollY > 50) {
             navbar.classList.add('scrolled');
@@ -20,20 +20,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Mobile menu toggle
+    // Abre e fecha o menu no celular
     menuToggle.addEventListener('click', () => {
         navLinksContainer.classList.toggle('active');
-        // Toggle menu icon between burger and X
+        // Troca o ícone entre menu (☰) e fechar (X)
         const icon = menuToggle.querySelector('i');
         if (navLinksContainer.classList.contains('active')) {
             icon.setAttribute('data-lucide', 'x');
         } else {
             icon.setAttribute('data-lucide', 'menu');
         }
-        lucide.createIcons(); // Re-render Lucide icons
+        lucide.createIcons(); // Atualiza os ícones após a troca
     });
 
-    // Close mobile menu when a link is clicked
+    // Fecha o menu ao clicar em qualquer link de navegação
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             navLinksContainer.classList.remove('active');
@@ -44,9 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ==========================================================================
-       2. COUNTDOWN TIMER
+       2. CONTAGEM REGRESSIVA
        ========================================================================== */
-    // Set the wedding date: February 8, 2027 at 16:30
+    // Data e horário do casamento: 08 de Fevereiro de 2027 às 16:30
     const weddingDate = new Date('Feb 08, 2027 16:30:00').getTime();
 
     const updateCountdown = () => {
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const secondsEl = document.getElementById('seconds');
 
         if (difference <= 0) {
-            // Wedding day has arrived!
+            // O dia do casamento chegou!
             document.getElementById('countdown').innerHTML = `
                 <div class="wedding-day-message" style="font-family: var(--font-serif); font-size: 1.8rem; color: var(--color-accent); font-style: italic; margin-top: 15px;">
                     Chegou o Grande Dia! ♥
@@ -68,25 +68,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Calculations
+        // Calcula dias, horas, minutos e segundos restantes
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-        // Update DOM with padding zeros
+        // Atualiza os valores na tela com zero à esquerda (ex: 09)
         daysEl.textContent = String(days).padStart(2, '0');
         hoursEl.textContent = String(hours).padStart(2, '0');
         minutesEl.textContent = String(minutes).padStart(2, '0');
         secondsEl.textContent = String(seconds).padStart(2, '0');
     };
 
-    // Run immediately and then every second
+    // Executa imediatamente e repete a cada segundo
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
     /* ==========================================================================
-       3. SCROLL REVEAL ANIMATIONS
+       3. ANIMAÇÕES DE REVELAÇÃO AO ROLAR A PÁGINA
        ========================================================================== */
     const revealElements = document.querySelectorAll('.scroll-reveal');
 
@@ -94,18 +94,18 @@ document.addEventListener('DOMContentLoaded', () => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('active');
-                revealObserver.unobserve(entry.target); // Reveal once
+                revealObserver.unobserve(entry.target); // Anima apenas uma vez
             }
         });
     }, {
         threshold: 0.15,
-        rootMargin: '0px 0px -50px 0px' // Trigger slightly before element enters view
+        rootMargin: '0px 0px -50px 0px' // Dispara um pouco antes do elemento aparecer na tela
     });
 
     revealElements.forEach(el => revealObserver.observe(el));
 
     /* ==========================================================================
-       4. PHOTO GALLERY WITH LIGHTBOX
+       4. GALERIA DE FOTOS COM LIGHTBOX
        ========================================================================== */
     const galleryItems = document.querySelectorAll('.gallery-item');
     const lightboxModal = document.getElementById('lightboxModal');
@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightboxPrev = document.getElementById('lightboxPrev');
     const lightboxNext = document.getElementById('lightboxNext');
 
-    // List of images in the gallery
+    // Lista de imagens da galeria
     const galleryImages = [
         'assets/gallery-rings.png',
         'assets/gallery-bouquet.png',
@@ -128,12 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxImg.src = galleryImages[currentImgIndex];
         lightboxImg.alt = galleryItems[currentImgIndex].querySelector('img').alt;
         lightboxModal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Stop page scrolling
+        document.body.style.overflow = 'hidden'; // Impede rolagem da página enquanto o modal está aberto
     };
 
     const closeLightbox = () => {
         lightboxModal.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.overflow = ''; // Restaura a rolagem da página
     };
 
     const prevImage = (e) => {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxImg.alt = galleryItems[currentImgIndex].querySelector('img').alt;
     };
 
-    // Attach Listeners
+    // Adiciona os eventos de clique em cada item da galeria
     galleryItems.forEach(item => {
         item.addEventListener('click', () => {
             openLightbox(item.getAttribute('data-index'));
@@ -161,14 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
     lightboxPrev.addEventListener('click', prevImage);
     lightboxNext.addEventListener('click', nextImage);
 
-    // Close lightbox on click outside the image
+    // Fecha o modal ao clicar fora da imagem
     lightboxModal.addEventListener('click', (e) => {
         if (e.target === lightboxModal) {
             closeLightbox();
         }
     });
 
-    // Keyboard controls for Lightbox
+    // Controles do teclado: Esc para fechar, setas para navegar
     document.addEventListener('keydown', (e) => {
         if (!lightboxModal.classList.contains('active')) return;
         if (e.key === 'Escape') closeLightbox();
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ==========================================================================
-       5. GIFT REGISTRY & PIX COPY SYSTEM
+       5. LISTA DE PRESENTES E SISTEMA DE CÓPIA DO PIX
        ========================================================================== */
     const giftButtons = document.querySelectorAll('.btn-gift-select');
     const copyPixBtn = document.getElementById('copyPixBtn');
@@ -192,18 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedGift = null;
 
-    // Selection logic
+    // Lógica de seleção dos presentes
     giftButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const amount = btn.getAttribute('data-amount');
             const itemName = btn.getAttribute('data-item');
 
-            // Toggle selection state
+            // Alterna a seleção do presente
             if (selectedGift && selectedGift.name === itemName) {
-                // Clicking again removes selection
+                // Clicou no mesmo presente — remove a seleção
                 removeGiftSelection();
             } else {
-                // Select new gift cota
+                // Seleciona o novo presente
                 giftButtons.forEach(b => b.classList.remove('selected'));
                 giftButtons.forEach(b => b.textContent = 'Presentear');
 
@@ -212,12 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 selectedGift = { name: itemName, value: amount };
                 
-                // Show banner
+                // Exibe o banner com o presente selecionado
                 selectedGiftName.textContent = itemName;
                 selectedGiftValue.textContent = `R$ ${parseFloat(amount).toFixed(2).replace('.', ',')}`;
                 selectedGiftBanner.classList.add('active');
 
-                // Smooth scroll to pix transfer box
+                // Rola suavemente até a área do Pix
                 pixContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         });
@@ -235,11 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
         removeGiftSelection();
     });
 
-    // Pix Key Copier
+    // Copiador da chave Pix
     copyPixBtn.addEventListener('click', () => {
         const keyText = pixKeyField.value;
         navigator.clipboard.writeText(keyText).then(() => {
-            // Visual feedback toast
+            // Exibe confirmação visual de cópia
             pixToast.classList.add('active');
             copyBtnText.textContent = 'Copiado!';
             copyPixBtn.querySelector('i').setAttribute('data-lucide', 'check');
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ==========================================================================
-       6. RSVP FORM MANAGEMENT
+       6. FORMULÁRIO DE CONFIRMAÇÃO DE PRESENÇA (RSVP)
        ========================================================================== */
     const rsvpForm = document.getElementById('rsvpForm');
     const rsvpFormContainer = document.getElementById('rsvpFormContainer');
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const guestsGroup = document.getElementById('guestsGroup');
     const rsvpGuests = document.getElementById('rsvpGuests');
 
-    // Dynamic show/hide accompaniment selection
+    // Mostra ou esconde o campo de acompanhantes conforme a resposta
     rsvpAttending.addEventListener('change', () => {
         if (rsvpAttending.value === 'no') {
             guestsGroup.classList.add('hidden');
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Helper for input error class toggle
+    // Adiciona ou remove a classe de erro no campo do formulário
     const toggleInputError = (input, isValid, errorEl) => {
         const group = input.closest('.form-group');
         if (isValid) {
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Validate email structure
+    // Valida o formato do e-mail
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const emailInput = document.getElementById('rsvpEmail');
         const attendingSelect = document.getElementById('rsvpAttending');
 
-        // Validation states
+        // Verifica se os campos obrigatórios são válidos
         const isNameValid = nameInput.value.trim().length > 2;
         const isEmailValid = validateEmail(emailInput.value.trim());
         const isAttendingValid = attendingSelect.value !== '';
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleInputError(attendingSelect, isAttendingValid);
 
         if (isNameValid && isEmailValid && isAttendingValid) {
-            // Collect Form data
+            // Coleta os dados do formulário
             const guestResponse = {
                 name: nameInput.value.trim(),
                 email: emailInput.value.trim(),
@@ -321,18 +321,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: new Date().getTime()
             };
 
-            // Save in localStorage (list)
+            // Salva a confirmação no armazenamento local do navegador
             let rsvpList = JSON.parse(localStorage.getItem('rsvp_confirmations')) || [];
-            // Remove previous answer from same email to avoid duplicates, only keep latest
+            // Remove resposta anterior do mesmo e-mail para evitar duplicatas
             rsvpList = rsvpList.filter(item => item.email.toLowerCase() !== guestResponse.email.toLowerCase());
             rsvpList.push(guestResponse);
             localStorage.setItem('rsvp_confirmations', JSON.stringify(rsvpList));
 
-            // Show Success Container
+            // Exibe a mensagem de sucesso após o envio
             rsvpFormContainer.style.display = 'none';
             rsvpSuccessContainer.classList.add('active');
 
-            // Build response message
+            // Monta a mensagem de confirmação personalizada
             if (guestResponse.attending === 'yes') {
                 const companionText = guestResponse.guests === 0 
                     ? 'Apenas você.' 
@@ -344,12 +344,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Edit RSVP back action
+    // Volta ao formulário para editar a confirmação
     rsvpEditBtn.addEventListener('click', () => {
         rsvpSuccessContainer.classList.remove('active');
         rsvpFormContainer.style.display = 'block';
 
-        // Prepopulate from storage if exists
+        // Preenche o formulário com os dados já salvos
         const rsvpList = JSON.parse(localStorage.getItem('rsvp_confirmations')) || [];
         if (rsvpList.length > 0) {
             const lastRsvp = rsvpList[rsvpList.length - 1];
@@ -369,41 +369,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ==========================================================================
-       7. GUESTBOOK MURAL (MURAL DE RECADOS)
+       7. MURAL DE RECADOS
        ========================================================================== */
     const guestbookForm = document.getElementById('guestbookForm');
     const guestbookMessagesContainer = document.getElementById('guestbookMessages');
 
-    // Default messages seeds
+    // Mensagens padrão exibidas antes de qualquer convidado escrever
     const defaultMessages = [
         {
             name: "Sofia e Bruno (Padrinhos)",
             message: "Casal maravilhoso! Que a cumplicidade de vocês continue crescendo a cada dia. O site ficou lindo, já confirmamos presença! Beijos!",
-            timestamp: new Date().getTime() - (4 * 60 * 60 * 1000) // 4 hours ago
+            timestamp: new Date().getTime() - (4 * 60 * 60 * 1000) // 4 horas atrás
         },
         {
             name: "Lucas P. (Amigo de infância)",
             message: "Que alegria ver vocês dando esse passo! O Felipe finalmente tomou juízo haha. Brincadeiras à parte, vocês merecem toda a felicidade do mundo. Vai ser a festa do ano!",
-            timestamp: new Date().getTime() - (24 * 60 * 60 * 1000) // 1 day ago
+            timestamp: new Date().getTime() - (24 * 60 * 60 * 1000) // 1 dia atrás
         },
         {
             name: "Tia Regina",
             message: "Meus afilhados lindos, que Deus abençoe imensamente essa união. Estou contando os dias para ver a Sarah de noiva! Amo vocês!",
-            timestamp: new Date().getTime() - (2 * 24 * 60 * 60 * 1000) // 2 days ago
+            timestamp: new Date().getTime() - (2 * 24 * 60 * 60 * 1000) // 2 dias atrás
         }
     ];
 
     const getMessages = () => {
         let list = localStorage.getItem('guestbook_messages');
         if (!list) {
-            // Seed defaults
+            // Salva as mensagens padrão na primeira vez que a página é aberta
             localStorage.setItem('guestbook_messages', JSON.stringify(defaultMessages));
             return defaultMessages;
         }
         return JSON.parse(list);
     };
 
-    // Format relative time helper
+    // Formata o tempo relativo (ex: "Há 2 dias", "Agora mesmo")
     const formatRelativeTime = (timestamp) => {
         const now = new Date().getTime();
         const diff = now - timestamp;
@@ -424,10 +424,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Render message list
+    // Renderiza a lista de mensagens do mural
     const renderMessages = () => {
         const messages = getMessages();
-        // Sort newest first
+        // Ordena as mensagens da mais recente para a mais antiga
         messages.sort((a, b) => b.timestamp - a.timestamp);
 
         guestbookMessagesContainer.innerHTML = '';
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Escaping to prevent XSS
+    // Escapa caracteres especiais para evitar ataques XSS
     const escapeHTML = (str) => {
         return str
             .replace(/&/g, "&amp;")
@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, "&#039;");
     };
 
-    // Form submit
+    // Envia o recado ao submeter o formulário
     guestbookForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -485,15 +485,15 @@ document.addEventListener('DOMContentLoaded', () => {
             messages.push(newMsg);
             localStorage.setItem('guestbook_messages', JSON.stringify(messages));
 
-            // Reset form inputs & remove error classes
+            // Limpa os campos e remove as marcações de erro
             guestbookForm.reset();
             nameInput.closest('.form-group').classList.remove('error');
             messageInput.closest('.form-group').classList.remove('error');
 
-            // Re-render
+            // Atualiza a lista de mensagens na tela
             renderMessages();
 
-            // Animate scroll guestbook list top to show the new message
+            // Rola o mural para o topo para mostrar a nova mensagem
             guestbookMessagesContainer.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -501,6 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial load
+    // Carrega as mensagens ao abrir a página
     renderMessages();
 });
