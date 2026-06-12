@@ -7,14 +7,14 @@
     <meta name="author" content="Felipe e Sarah">
     <meta name="robots" content="index, follow">
     
-    <!-- Open Graph / Facebook -->
+    <!-- Compartilhamento em redes sociais (Facebook, WhatsApp, etc.) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://felipeesarah2026.com.br/">
     <meta property="og:title" content="Casamento de Felipe & Sarah - 08.02.2027">
     <meta property="og:description" content="Venha comemorar conosco esse dia especial! Confirme sua presença e acesse as informações do evento.">
     <meta property="og:image" content="assets/hero-bg.png">
 
-    <!-- Twitter -->
+    <!-- Compartilhamento no Twitter / X -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="Casamento de Felipe & Sarah - 08.02.2027">
     <meta property="twitter:description" content="Venha comemorar conosco esse dia especial! Confirme sua presença e acesse as informações do evento.">
@@ -22,30 +22,30 @@
 
     <title>Casamento de Felipe & Sarah - 08.02.2027</title>
 
-    <!-- Google Fonts -->
+    <!-- Fontes do Google: Inter (textos) e Playfair Display (títulos elegantes) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-    <!-- Stylesheet -->
+    <!-- Arquivo de estilos principal -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Lucide Icons CDN -->
+    <!-- Biblioteca de ícones Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
-    <!-- Header / Navbar -->
+    <!-- ===== CABEÇALHO / MENU DE NAVEGAÇÃO ===== -->
     <header class="navbar-container">
         <div class="navbar-wrapper">
             <a href="#" class="nav-logo" id="navLogo">F & S</a>
             
-            <!-- Mobile Menu Toggle -->
+            <!-- Botão de abrir/fechar menu em dispositivos móveis -->
             <button class="mobile-menu-toggle" id="menuToggle" aria-label="Abrir menu de navegação">
                 <i data-lucide="menu"></i>
             </button>
 
-            <!-- Nav Links -->
+            <!-- Links de navegação -->
             <nav class="nav-links" id="navLinks">
                 <a href="#story" class="nav-link">Nossa História</a>
                 <a href="#details" class="nav-link">O Evento</a>
@@ -57,10 +57,10 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
     <main>
 
-        <!-- Hero Section -->
+        <!-- ===== SEÇÃO INICIAL (HERO) — foto de fundo com contagem regressiva ===== -->
         <section class="hero-section" id="home">
             <div class="hero-overlay"></div>
             <div class="hero-content">
@@ -68,7 +68,7 @@
                 <h1 class="hero-title">Felipe & Sarah</h1>
                 <p class="hero-countdown-label">Faltam apenas:</p>
                 
-                <!-- Countdown Container -->
+                <!-- Contagem regressiva — os valores são atualizados pelo JavaScript -->
                 <div class="countdown-container" id="countdown">
                     <div class="countdown-item">
                         <span class="countdown-value" id="days">00</span>
@@ -94,13 +94,13 @@
                 </div>
             </div>
             
-            <!-- Scroll Indicator -->
+            <!-- Seta animada indicando que o usuário pode rolar a página -->
             <div class="scroll-indicator">
                 <i data-lucide="chevron-down" class="scroll-arrow"></i>
             </div>
         </section>
 
-        <!-- Story Section -->
+        <!-- ===== SEÇÃO NOSSA HISTÓRIA ===== -->
         <section class="story-section scroll-reveal" id="story">
             <div class="container">
                 <div class="section-header">
@@ -130,7 +130,7 @@
             </div>
         </section>
 
-        <!-- Event Details Section -->
+        <!-- ===== SEÇÃO DETALHES DO EVENTO ===== -->
         <section class="details-section scroll-reveal" id="details">
             <div class="container">
                 <div class="section-header">
@@ -140,7 +140,7 @@
                 </div>
 
                 <div class="details-grid">
-                    <!-- Ceremony Card -->
+                    <!-- Card da Cerimônia -->
                     <div class="details-card">
                         <div class="card-icon-wrapper">
                             <i data-lucide="church" class="card-icon"></i>
@@ -154,7 +154,7 @@
                         </a>
                     </div>
 
-                    <!-- Reception Card -->
+                    <!-- Card da Recepção -->
                     <div class="details-card">
                         <div class="card-icon-wrapper">
                             <i data-lucide="glass-water" class="card-icon"></i>
@@ -169,7 +169,7 @@
                     </div>
                 </div>
 
-                <!-- Dress Code and Details -->
+                <!-- Caixa de informações sobre traje e paleta de cores -->
                 <div class="dress-code-box">
                     <div class="dress-code-icon">
                         <i data-lucide="shirt" class="card-icon"></i>
@@ -193,7 +193,7 @@
             </div>
         </section>
 
-        <!-- Gallery Section -->
+        <!-- ===== SEÇÃO GALERIA DE FOTOS ===== -->
         <section class="gallery-section scroll-reveal" id="gallery">
             <div class="container">
                 <div class="section-header">
@@ -231,7 +231,7 @@
             </div>
         </section>
 
-        <!-- Lightbox Modal -->
+        <!-- Modal de visualização ampliada das fotos (lightbox) -->
         <div class="lightbox-modal" id="lightboxModal" role="dialog" aria-modal="true" aria-label="Visualizador de fotos">
             <button class="lightbox-close" id="lightboxClose" aria-label="Fechar galeria">&times;</button>
             <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Foto anterior">&#10094;</button>
@@ -241,7 +241,7 @@
             <button class="lightbox-nav next" id="lightboxNext" aria-label="Próxima foto">&#10095;</button>
         </div>
 
-        <!-- Gift Registry Section -->
+        <!-- ===== SEÇÃO LISTA DE PRESENTES ===== -->
         <section class="registry-section scroll-reveal" id="registry">
             <div class="container">
                 <div class="section-header">
@@ -251,7 +251,7 @@
                     <p class="section-intro">Sua presença é o nosso maior presente! Mas se você deseja nos presentear, criamos uma lista de presentes virtuais (cotas para nossa Lua de Mel e enxoval).</p>
                 </div>
 
-                <!-- Gift Grid -->
+                <!-- Grade com os cartões de presente -->
                 <div class="gift-grid">
                     <div class="gift-card">
                         <div class="gift-icon-box"><i data-lucide="plane"></i></div>
@@ -283,7 +283,7 @@
                     </div>
                 </div>
 
-                <!-- Pix Box Area -->
+                <!-- Área do Pix — QR Code e chave para pagamento -->
                 <div class="pix-area-box" id="pixContainer">
                     <div class="pix-title-wrapper">
                         <i data-lucide="qr-code" class="pix-title-icon"></i>
@@ -292,7 +292,7 @@
                     <p class="pix-text">Você pode fazer uma transferência de qualquer valor ou pagar a cota selecionada acima diretamente usando o QR Code ou copiando a chave Pix abaixo.</p>
                     
                     <div class="pix-visual-container">
-                        <!-- Simulated QR Code -->
+                        <!-- QR Code ilustrativo (decorativo) -->
                         <div class="pix-qrcode-wrapper">
                             <div class="mock-qrcode">
                                 <div class="qrcode-corner top-left"></div>
@@ -304,7 +304,7 @@
                             <span>Pix dos Noivos</span>
                         </div>
 
-                        <!-- Pix Key Copier -->
+                        <!-- Campo com a chave Pix e botão de copiar -->
                         <div class="pix-key-wrapper">
                             <label for="pixKeyField">Chave Pix (E-mail):</label>
                             <div class="pix-copy-input-group">
@@ -315,7 +315,7 @@
                             </div>
                             <span class="pix-success-toast" id="pixToast">Chave Pix copiada com sucesso!</span>
                             
-                            <!-- Dynamic Selected Gift Area -->
+                            <!-- Exibe o presente selecionado pelo convidado — atualizado pelo JavaScript -->
                             <div class="selected-gift-banner" id="selectedGiftBanner">
                                 <p>Cota selecionada: <strong id="selectedGiftName">Nenhum</strong></p>
                                 <p>Valor sugerido: <strong id="selectedGiftValue">R$ 0,00</strong></p>
@@ -327,7 +327,7 @@
             </div>
         </section>
 
-        <!-- RSVP Section -->
+        <!-- ===== SEÇÃO DE CONFIRMAÇÃO DE PRESENÇA (RSVP) ===== -->
         <section class="rsvp-section scroll-reveal" id="rsvp">
             <div class="container">
                 <div class="section-header">
@@ -337,7 +337,7 @@
                     <p class="section-intro">Por favor, confirme sua presença até o dia <strong>08 de Janeiro de 2027</strong> para que possamos organizar tudo com muito carinho.</p>
                 </div>
 
-                <!-- RSVP Form Card -->
+                <!-- Cartão com o formulário de confirmação -->
                 <div class="rsvp-card-wrapper">
                     <div class="rsvp-form-container" id="rsvpFormContainer">
                         <form id="rsvpForm" novalidate>
@@ -386,7 +386,7 @@
                         </form>
                     </div>
 
-                    <!-- RSVP Success State (Hidden by Default) -->
+                    <!-- Mensagem de sucesso exibida após o envio do formulário (oculta por padrão) -->
                     <div class="rsvp-success-container" id="rsvpSuccessContainer">
                         <div class="success-icon-wrapper">
                             <i data-lucide="heart-handshake" class="success-icon"></i>
@@ -399,7 +399,7 @@
             </div>
         </section>
 
-        <!-- Guestbook Section -->
+        <!-- ===== SEÇÃO MURAL DE RECADOS ===== -->
         <section class="guestbook-section scroll-reveal" id="guestbook">
             <div class="container">
                 <div class="section-header">
@@ -410,7 +410,7 @@
                 </div>
 
                 <div class="guestbook-grid">
-                    <!-- Write Message Card -->
+                    <!-- Formulário para enviar uma nova mensagem -->
                     <div class="guestbook-form-card">
                         <h3>Deixar Recado</h3>
                         <form id="guestbookForm" novalidate>
@@ -430,11 +430,10 @@
                         </form>
                     </div>
 
-                    <!-- Message List Scrollable -->
+                    <!-- Lista de mensagens enviadas pelos convidados — preenchida pelo JavaScript -->
                     <div class="guestbook-list-container">
                         <h3>Mensagens Enviadas</h3>
                         <div class="guestbook-messages" id="guestbookMessages">
-                            <!-- Populated by JS -->
                         </div>
                     </div>
                 </div>
@@ -443,7 +442,7 @@
 
     </main>
 
-    <!-- Footer -->
+    <!-- ===== RODAPÉ ===== -->
     <footer class="footer-container">
         <div class="footer-wave"></div>
         <div class="footer-content">
@@ -455,7 +454,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript File -->
+    <!-- Arquivo JavaScript principal -->
     <script src="app.js"></script>
 </body>
 </html>
