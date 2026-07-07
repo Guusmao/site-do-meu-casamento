@@ -557,8 +557,8 @@ p {
 
 .story-grid {
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 80px;
+    grid-template-columns: 1.28fr 0.92fr;
+    gap: 52px;
     align-items: center;
 }
 
@@ -601,14 +601,14 @@ p {
 
 .story-chapter-title {
     font-family: var(--font-serif);
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     color: var(--color-primary);
     font-weight: 600;
 }
 
 .story-quote {
     font-family: var(--font-serif);
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-style: italic;
     line-height: 1.5;
     color: var(--color-primary);
@@ -629,7 +629,8 @@ p {
 
 .story-paragraph {
     color: var(--color-text-muted);
-    font-size: 1.05rem;
+    font-size: 0.98rem;
+    line-height: 1.7;
     text-align: justify;
 }
 
