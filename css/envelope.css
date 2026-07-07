@@ -1,0 +1,249 @@
+/* Landing page wrapper */
+.landing-wrapper {
+    position: relative;
+}
+
+:root {
+    --primary: var(--color-white);
+    --bg-color: var(--color-bg);
+    --bg-envelope-color: var(--color-white);
+    --envelope-tab: var(--color-primary-light);
+    --envelope-cover: var(--color-primary);
+    --shadow-color: rgba(86, 106, 140, 0.22);
+    --txt-color: var(--color-text);
+}
+
+.envelope-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem 1rem;
+    overflow: hidden;
+    background:
+        radial-gradient(800px 360px at 50% -20%, rgba(255, 255, 255, 0.78), transparent 62%),
+        radial-gradient(700px 320px at 100% 100%, rgba(143, 168, 200, 0.22), transparent 62%),
+        var(--bg-color);
+}
+
+.envelope-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: repeating-linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.04),
+        rgba(255, 255, 255, 0.04) 8px,
+        rgba(255, 255, 255, 0) 8px,
+        rgba(255, 255, 255, 0) 22px
+    );
+}
+
+.envelope-cta {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    text-align: center;
+}
+
+.envelope-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+    color: var(--color-primary);
+}
+
+.envelope-instruction {
+    color: var(--color-text-muted);
+    font-size: clamp(0.94rem, 2vw, 1.08rem);
+}
+
+.envelope-wrapper {
+    position: relative;
+    z-index: 2;
+    background: var(--bg-envelope-color);
+    border-radius: 10px;
+    box-shadow: 0 18px 40px var(--shadow-color);
+    padding: 0;
+}
+
+.envelope {
+    position: relative;
+    width: min(82vw, 300px);
+    height: calc(min(82vw, 300px) * 0.7667);
+    overflow: hidden;
+}
+
+.envelope::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    z-index: 3;
+    border-top: calc(min(82vw, 300px) * 0.4333) solid var(--envelope-tab);
+    border-right: calc(min(82vw, 300px) * 0.5) solid transparent;
+    border-left: calc(min(82vw, 300px) * 0.5) solid transparent;
+    transform-origin: top;
+    transition: transform 0.5s ease-in-out;
+}
+
+.envelope::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    width: 0;
+    height: 0;
+    border-top: calc(min(82vw, 300px) * 0.4333) solid transparent;
+    border-right: calc(min(82vw, 300px) * 0.5) solid var(--envelope-cover);
+    border-bottom: calc(min(82vw, 300px) * 0.3333) solid var(--envelope-cover);
+    border-left: calc(min(82vw, 300px) * 0.5) solid var(--envelope-cover);
+}
+
+.letter {
+    position: absolute;
+    right: 20%;
+    top: 8%;
+    width: 54%;
+    height: 80%;
+    background: var(--primary);
+    text-align: center;
+    transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    box-shadow: 0 0 5px var(--shadow-color);
+    padding: 14px 10px;
+    transform: translateY(34%) scale(0.94);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 0;
+}
+
+.letter .text {
+    font-family: var(--font-sans);
+    color: var(--txt-color);
+    text-align: left;
+    font-size: 10px;
+}
+
+.letter .text strong {
+    display: block;
+    margin-bottom: 8px;
+    font-family: var(--font-serif);
+    font-size: 0.92rem;
+    color: var(--color-primary);
+}
+
+.letter .text p {
+    font-size: 10px;
+    line-height: 1.35;
+    font-weight: 400;
+}
+
+.heart {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    z-index: 4;
+    transform: translate(-50%, -22%);
+    transition: transform 0.5s ease-in-out 1s, opacity 0.35s ease;
+    box-shadow: none;
+    cursor: pointer;
+    overflow: visible;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seal-text {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--color-white);
+    text-shadow: 0 2px 8px rgba(143, 168, 200, 0.25);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.heart:hover {
+    transform: translate(-50%, -26%) scale(1.03);
+}
+
+.envelope-wrapper.flap .envelope::before {
+    transform: rotateX(180deg);
+    z-index: 0;
+}
+
+.envelope-wrapper.flap .envelope .letter {
+    transform: translateY(-42%) scale(1.08);
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+    transition-delay: 0.28s;
+}
+
+.envelope-wrapper.flap .envelope {
+    overflow: visible;
+}
+
+.envelope-wrapper.flap .heart {
+    transform: translate(-50%, -60%) scale(0.85);
+    opacity: 0;
+    transition-delay: 0.4s;
+}
+
+.envelope-overlay.hidden {
+    animation: fadeOutOverlay 0.42s forwards;
+    pointer-events: none;
+}
+
+@keyframes fadeOutOverlay {
+    from {
+        opacity: 1;
+        visibility: visible;
+    }
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@media (max-width: 768px) {
+    .envelope-overlay {
+        gap: 1.4rem;
+    }
+
+    .envelope {
+        width: min(88vw, 300px);
+        height: calc(min(88vw, 300px) * 0.7667);
+    }
+
+    .letter .text {
+        font-size: 9px;
+    }
+
+    .envelope-wrapper.flap .envelope .letter {
+        transform: translateY(-34%) scale(1.04);
+        transition-delay: 0.28s;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .envelope::before,
+    .letter,
+    .heart,
+    .envelope-overlay {
+        transition: none;
+        animation: none;
+    }
+}

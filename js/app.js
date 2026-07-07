@@ -9,6 +9,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inicializa os ícones da biblioteca Lucide
     lucide.createIcons();
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('overlay-active');
+
+    const envelopeOverlay = document.getElementById('envelopeOverlay');
+    const envelopeWrapper = envelopeOverlay?.querySelector('.envelope-wrapper');
+    const heartSeal = document.getElementById('heartSeal');
+
+    if (envelopeOverlay && envelopeWrapper && heartSeal) {
+        const openEnvelope = () => {
+            if (envelopeWrapper.classList.contains('flap')) return;
+
+            envelopeWrapper.classList.add('flap');
+
+            setTimeout(() => {
+                envelopeOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+                document.body.classList.remove('overlay-active');
+            }, 1300);
+        };
+
+        heartSeal.addEventListener('click', openEnvelope);
+        heartSeal.addEventListener('touchend', openEnvelope);
+    }
 
     /* ==========================================================================
        1. NAVEGAÇÃO E CABEÇALHO
@@ -18,35 +41,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinksContainer = document.getElementById('navLinks');
     const navLinks = document.querySelectorAll('.nav-link');
 
+    const setMenuIcon = (iconName) => {
+        menuToggle.innerHTML = `<i data-lucide="${iconName}"></i>`;
+        lucide.createIcons();
+    };
+
     // Adiciona classe ao menu quando o usuário rola a página
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
+    const navbarScrollTrigger = 120;
+    const updateNavbarOnScroll = () => {
+        if (window.scrollY > navbarScrollTrigger) {
             navbar.classList.add('scrolled');
         } else {
             navbar.classList.remove('scrolled');
         }
-    });
+    };
+
+    window.addEventListener('scroll', updateNavbarOnScroll);
+    updateNavbarOnScroll();
 
     // Abre e fecha o menu no celular
     menuToggle.addEventListener('click', () => {
         navLinksContainer.classList.toggle('active');
         // Troca o ícone entre menu (☰) e fechar (X)
-        const icon = menuToggle.querySelector('i');
-        if (navLinksContainer.classList.contains('active')) {
-            icon.setAttribute('data-lucide', 'x');
+        const isActive = navLinksContainer.classList.contains('active');
+        menuToggle.setAttribute('aria-expanded', String(isActive));
+        if (isActive) {
+            setMenuIcon('x');
         } else {
-            icon.setAttribute('data-lucide', 'menu');
+            setMenuIcon('menu');
         }
-        lucide.createIcons(); // Atualiza os ícones após a troca
     });
 
     // Fecha o menu ao clicar em qualquer link de navegação
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             navLinksContainer.classList.remove('active');
-            const icon = menuToggle.querySelector('i');
-            icon.setAttribute('data-lucide', 'menu');
-            lucide.createIcons();
+            menuToggle.setAttribute('aria-expanded', 'false');
+            setMenuIcon('menu');
         });
     });
 
@@ -123,10 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lista de imagens da galeria
     const galleryImages = [
-        'assets/gallery-rings.png',
-        'assets/gallery-bouquet.png',
-        'assets/gallery-table.png',
-        'assets/gallery-cake.png'
+        'assets/images/gallery/gallery-rings.png',
+        'assets/images/gallery/gallery-bouquet.png',
+        'assets/images/gallery/gallery-table.png',
+        'assets/images/gallery/gallery-cake.png'
     ];
     let currentImgIndex = 0;
 

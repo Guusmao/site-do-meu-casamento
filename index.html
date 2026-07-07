@@ -1,47 +1,79 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Site oficial de casamento de Felipe e Sarah. Confirme sua presença, acesse a nossa lista de presentes e confira todos os detalhes do nosso grande dia!">
+    <meta name="description"
+        content="Site oficial de casamento de Felipe e Sarah. Confirme sua presença, acesse a nossa lista de presentes e confira todos os detalhes do nosso grande dia!">
     <meta name="author" content="Sarah e Felipe">
     <meta name="robots" content="index, follow">
-    
+
     <!-- Compartilhamento em redes sociais (Facebook, WhatsApp, etc.) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://felipeesarah2026.com.br/">
-    <meta property="og:title" content="Casamento de Felipe & Sarah - 08.02.2027">
-    <meta property="og:description" content="Venha comemorar conosco esse dia especial! Confirme sua presença e acesse as informações do evento.">
-    <meta property="og:image" content="assets/hero-bg.png">
+    <meta property="og:title" content="Casamento de Sarah & Felipe - 08.02.2027">
+    <meta property="og:description"
+        content="Venha comemorar conosco esse dia especial! Confirme sua presença e acesse as informações do evento.">
+    <meta property="og:image" content="assets/images/hero/hero-bg.png">
 
     <!-- Compartilhamento no Twitter / X -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Casamento de Felipe & Sarah - 08.02.2027">
-    <meta property="twitter:description" content="Venha comemorar conosco esse dia especial! Confirme sua presença e acesse as informações do evento.">
-    <meta property="twitter:image" content="assets/hero-bg.png">
+    <meta property="twitter:title" content="Casamento de Sarah & Felipe - 08.02.2027">
+    <meta property="twitter:description"
+        content="Venha comemorar conosco esse dia especial! Confirme sua presença e acesse as informações do evento.">
+    <meta property="twitter:image" content="assets/images/hero/hero-bg.png">
 
-    <title>Casamento de Felipe & Sarah - 08.02.2027</title>
+    <title>Casamento de Sarah & Felipe - 08.02.2027</title>
+    <link rel="icon" type="image/png" href="assets/images/branding/logo-oficial.png.png">
+    <link rel="apple-touch-icon" href="assets/images/branding/logo-oficial.png.png">
 
     <!-- Fontes do Google: Inter (textos) e Playfair Display (títulos elegantes) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
 
     <!-- Arquivo de estilos principal -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/envelope.css">
 
     <!-- Biblioteca de ícones Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
+    <div class="landing-wrapper">
+        <section id="envelopeOverlay" class="envelope-overlay">
+            <div class="envelope-cta">
+                <h2 class="envelope-title">Você foi convidado</h2>
+                <p class="envelope-instruction">Clique no selo para abrir o convite</p>
+            </div>
+            <div class="envelope-wrapper">
+                <div class="envelope">
+                    <div class="letter" aria-hidden="true">
+                        <div class="text">
+                            <strong>Felipe &amp; Sarah</strong>
+                            <p>Com alegria, convidamos voce para celebrar o nosso grande dia em 08 de Fevereiro de 2027.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="heart" id="heartSeal" type="button" aria-label="Abrir envelope">
+                    <span class="seal-text">S&amp;F</span>
+                </button>
+            </div>
+        </section>
+    </div>
 
     <!-- ===== CABEÇALHO / MENU DE NAVEGAÇÃO ===== -->
     <header class="navbar-container">
         <div class="navbar-wrapper">
-            <a href="#" class="nav-logo" id="navLogo">
-            
+            <a href="#home" class="nav-logo" id="navLogo">Sarah & Felipe</a>
+
             <!-- Botão de abrir/fechar menu em dispositivos móveis -->
-            <button class="mobile-menu-toggle" id="menuToggle" aria-label="Abrir menu de navegação">
+            <button class="mobile-menu-toggle" id="menuToggle" aria-label="Abrir menu de navegação"
+                aria-controls="navLinks" aria-expanded="false" type="button">
                 <i data-lucide="menu"></i>
             </button>
 
@@ -67,7 +99,7 @@
                 <p class="hero-subtitle">Salvem esta data • 08 de Fevereiro de 2027</p>
                 <h1 class="hero-title">Sarah & Felipe</h1>
                 <p class="hero-countdown-label">Faltam apenas:</p>
-                
+
                 <!-- Contagem regressiva — os valores são atualizados pelo JavaScript -->
                 <div class="countdown-container" id="countdown">
                     <div class="countdown-item">
@@ -93,7 +125,7 @@
                     <a href="#details" class="btn-secondary" id="heroDetailsBtn">Ver Detalhes</a>
                 </div>
             </div>
-            
+
             <!-- Seta animada indicando que o usuário pode rolar a página -->
             <div class="scroll-indicator">
                 <i data-lucide="chevron-down" class="scroll-arrow"></i>
@@ -111,31 +143,50 @@
 
                 <div class="story-grid">
                     <div class="story-image-wrapper">
-                        <img src="assets/couple-story.png" alt="Felipe e Sarah sorrindo ao ar livre" class="story-img">
+                        <img src="assets/images/story/couple-story.png" alt="Felipe e Sarah sorrindo ao ar livre" class="story-img">
                         <div class="story-image-decoration"></div>
                     </div>
                     <div class="story-text-wrapper">
-                        <p class="story-quote">"Um dia sequer sem nos vermos era como mil anos longe um do outro." <span class="quote-author">— Felipe e Sarah</span></p>
-                        <p class="story-paragraph">
-                            O primeiro olhar
-
-                            Tudo começou nos bastidores do time de louvor. Um amigo falou sobre ela — "é um partidão" — e logo a história de dois estava na boca de todo mundo. A boa intenção dos amigos quase os afastou, mas o destino tinha outros planos. Em um retiro de jovens, um amigo os colocou no mesmo carro de volta. Foi ali que os olhares mudaram.
-                        </p>
-                        <p class="story-paragraph">
-                            O gesto que cativou
-
-                            Naquele mesmo retiro, em um dia de muito calor, ela trouxe água para ele depois do louvor. Um gesto simples — mas que ficou. Depois disso, vieram as conversas diárias, a aproximação, e em menos de um mês o primeiro encontro. Nesse dia, abriram o coração um para o outro: medos, sonhos, intenções e a certeza de que queriam seguir juntos.
-                        </p>
-                        <p class="story-paragraph">
-                            O pedido de namoro
-
-                            Um mês depois, ele a levou até uma cafeteria. Com a ajuda de um amigo de confiança — que ficou do lado de fora segurando as flores — pediu licença, saiu "para o banheiro" e voltou com o buquê. Quando ela viu, ficou vermelha de emoção. Disseram sim um ao outro, e começaram a construir a rotina de dois.
-                        </p>
-                        <p class="story-paragraph">
-                            O pedido de casamento
-
-                            Um ano e meio depois, ele planejou cada detalhe: fotógrafos escondidos, flores, e uma praia ao pôr do sol. Mas a aliança no bolso quase foi descoberta antes da hora — ela tocou sem querer na caixinha. No local escolhido, as flores foram entregues por um estranho que cutucou seu ombro. Ele as segurou nas costas. Ela passou a mão pela cintura dele... e encontrou o buquê. Riram juntos, nervosos. Ele se ajoelhou. Ela disse sim — e o lugar vazio virou uma torcida inteira comemorando.
-                        </p>
+                        <p class="story-quote">"Um dia sequer sem nos vermos era como mil anos longe um do outro." <span
+                                class="quote-author">— Felipe e Sarah</span></p>
+                        <div class="story-chapter">
+                            <h3 class="story-chapter-title">O primeiro olhar</h3>
+                            <p class="story-paragraph">
+                                Tudo começou nos bastidores do time de louvor. Um amigo falou sobre ela — "é um partidão" —
+                                e logo a história de dois estava na boca de todo mundo. A boa intenção dos amigos quase os
+                                afastou, mas o destino tinha outros planos. Em um retiro de jovens, um amigo os colocou no
+                                mesmo carro de volta. Foi ali que os olhares mudaram.
+                            </p>
+                        </div>
+                        <div class="story-chapter">
+                            <h3 class="story-chapter-title">O gesto que cativou</h3>
+                            <p class="story-paragraph">
+                                Naquele mesmo retiro, em um dia de muito calor, ela trouxe água para ele depois do louvor.
+                                Um gesto simples — mas que ficou. Depois disso, vieram as conversas diárias, a aproximação,
+                                e em menos de um mês o primeiro encontro. Nesse dia, abriram o coração um para o outro:
+                                medos, sonhos, intenções e a certeza de que queriam seguir juntos.
+                            </p>
+                        </div>
+                        <div class="story-chapter">
+                            <h3 class="story-chapter-title">O pedido de namoro</h3>
+                            <p class="story-paragraph">
+                                Um mês depois, ele a levou até uma cafeteria. Com a ajuda de um amigo de confiança — que
+                                ficou do lado de fora segurando as flores — pediu licença, saiu "para o banheiro" e voltou
+                                com o buquê. Quando ela viu, ficou vermelha de emoção. Disseram sim um ao outro, e começaram
+                                a construir a rotina de dois.
+                            </p>
+                        </div>
+                        <div class="story-chapter">
+                            <h3 class="story-chapter-title">O pedido de casamento</h3>
+                            <p class="story-paragraph">
+                                Um ano e meio depois, ele planejou cada detalhe: fotógrafos escondidos, flores, e uma praia
+                                ao pôr do sol. Mas a aliança no bolso quase foi descoberta antes da hora — ela tocou sem
+                                querer na caixinha. No local escolhido, as flores foram entregues por um estranho que
+                                cutucou seu ombro. Ele as segurou nas costas. Ela passou a mão pela cintura dele... e
+                                encontrou o buquê. Riram juntos, nervosos. Ele se ajoelhou. Ela disse sim — e o lugar vazio
+                                virou uma torcida inteira comemorando.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,7 +214,10 @@
                     </div>
 
                     <div class="details-map">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3981.022915005548!2d-38.5719358!3d-3.805124!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7c74dd77e1f17bb%3A0x4cc17b6d2d2f885!2sR.%20Dr.%20Rodrigo%20Codes%20Sandoval%2C%2076%20-%20Mondubim%2C%20Fortaleza%20-%20CE%2C%2060711-455!5e0!3m2!1spt-BR!2sbr!4v1782059771843!5m2!1spt-BR!2sbr" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3981.022915005548!2d-38.5719358!3d-3.805124!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7c74dd77e1f17bb%3A0x4cc17b6d2d2f885!2sR.%20Dr.%20Rodrigo%20Codes%20Sandoval%2C%2076%20-%20Mondubim%2C%20Fortaleza%20-%20CE%2C%2060711-455!5e0!3m2!1spt-BR!2sbr!4v1782059771843!5m2!1spt-BR!2sbr"
+                            style="border:0;" allowfullscreen="" loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
 
@@ -184,7 +238,8 @@
                                 <div class="color-swatch sw-navy" title="Azul Marinho"></div>
                                 <div class="color-swatch sw-taupe" title="Cinza Quente"></div>
                             </div>
-                            <small class="palette-warning">* Pedimos a gentileza de evitar roupas na cor branca ou off-white, reservadas exclusivamente para a noiva.</small>
+                            <small class="palette-warning">* Pedimos a gentileza de evitar roupas na cor branca ou
+                                off-white, reservadas exclusivamente para a noiva.</small>
                         </div>
                     </div>
                 </div>
@@ -202,25 +257,28 @@
 
                 <div class="gallery-grid">
                     <div class="gallery-item" data-index="0">
-                        <img src="assets/gallery-rings.png" alt="Anéis de casamento dourados" class="gallery-img">
+                        <img src="assets/images/gallery/gallery-rings.png" alt="Anéis de casamento dourados" class="gallery-img">
                         <div class="gallery-overlay">
                             <i data-lucide="zoom-in" class="overlay-icon"></i>
                         </div>
                     </div>
                     <div class="gallery-item" data-index="1">
-                        <img src="assets/gallery-bouquet.png" alt="Buquê de noiva com rosas elegantes" class="gallery-img">
+                        <img src="assets/images/gallery/gallery-bouquet.png" alt="Buquê de noiva com rosas elegantes"
+                            class="gallery-img">
                         <div class="gallery-overlay">
                             <i data-lucide="zoom-in" class="overlay-icon"></i>
                         </div>
                     </div>
                     <div class="gallery-item" data-index="2">
-                        <img src="assets/gallery-table.png" alt="Decoração elegante da mesa do casamento" class="gallery-img">
+                        <img src="assets/images/gallery/gallery-table.png" alt="Decoração elegante da mesa do casamento"
+                            class="gallery-img">
                         <div class="gallery-overlay">
                             <i data-lucide="zoom-in" class="overlay-icon"></i>
                         </div>
                     </div>
                     <div class="gallery-item" data-index="3">
-                        <img src="assets/gallery-cake.png" alt="Bolo de casamento de três andares com flores" class="gallery-img">
+                        <img src="assets/images/gallery/gallery-cake.png" alt="Bolo de casamento de três andares com flores"
+                            class="gallery-img">
                         <div class="gallery-overlay">
                             <i data-lucide="zoom-in" class="overlay-icon"></i>
                         </div>
@@ -230,7 +288,8 @@
         </section>
 
         <!-- Modal de visualização ampliada das fotos (lightbox) -->
-        <div class="lightbox-modal" id="lightboxModal" role="dialog" aria-modal="true" aria-label="Visualizador de fotos">
+        <div class="lightbox-modal" id="lightboxModal" role="dialog" aria-modal="true"
+            aria-label="Visualizador de fotos">
             <button class="lightbox-close" id="lightboxClose" aria-label="Fechar galeria">&times;</button>
             <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Foto anterior">&#10094;</button>
             <div class="lightbox-content">
@@ -246,7 +305,8 @@
                     <span class="section-subtitle">Lista de Presentes</span>
                     <h2 class="section-title">Presentes Virtuais</h2>
                     <div class="divider"></div>
-                    <p class="section-intro">Sua presença é o nosso maior presente! Mas se você deseja nos presentear, criamos uma lista de presentes virtuais (cotas para nossa Lua de Mel e enxoval).</p>
+                    <p class="section-intro">Sua presença é o nosso maior presente! Mas se você deseja nos presentear,
+                        criamos uma lista de presentes virtuais (cotas para nossa Lua de Mel e enxoval).</p>
                 </div>
 
                 <!-- Grade com os cartões de presente -->
@@ -256,28 +316,32 @@
                         <h4>Passagens Aéreas</h4>
                         <p class="gift-desc">Contribua com as passagens para nossa viagem de lua de mel.</p>
                         <span class="gift-value">R$ 300,00</span>
-                        <button class="btn-gift-select" data-amount="300" data-item="Passagens Aéreas">Presentear</button>
+                        <button class="btn-gift-select" data-amount="300"
+                            data-item="Passagens Aéreas">Presentear</button>
                     </div>
                     <div class="gift-card">
                         <div class="gift-icon-box"><i data-lucide="hotel"></i></div>
                         <h4>Hospedagem de Charme</h4>
                         <p class="gift-desc">Ajude-nos a garantir noites aconchegantes em um hotel romântico.</p>
                         <span class="gift-value">R$ 500,00</span>
-                        <button class="btn-gift-select" data-amount="500" data-item="Hospedagem de Charme">Presentear</button>
+                        <button class="btn-gift-select" data-amount="500"
+                            data-item="Hospedagem de Charme">Presentear</button>
                     </div>
                     <div class="gift-card">
                         <div class="gift-icon-box"><i data-lucide="utensils"></i></div>
                         <h4>Jantar Romântico</h4>
                         <p class="gift-desc">Um jantar especial à luz de velas para celebrarmos o amor.</p>
                         <span class="gift-value">R$ 150,00</span>
-                        <button class="btn-gift-select" data-amount="150" data-item="Jantar Romântico">Presentear</button>
+                        <button class="btn-gift-select" data-amount="150"
+                            data-item="Jantar Romântico">Presentear</button>
                     </div>
                     <div class="gift-card">
                         <div class="gift-icon-box"><i data-lucide="compass"></i></div>
                         <h4>Passeio de Aventura</h4>
                         <p class="gift-desc">Um dia cheio de passeios e memórias inesquecíveis.</p>
                         <span class="gift-value">R$ 200,00</span>
-                        <button class="btn-gift-select" data-amount="200" data-item="Passeio de Aventura">Presentear</button>
+                        <button class="btn-gift-select" data-amount="200"
+                            data-item="Passeio de Aventura">Presentear</button>
                     </div>
                 </div>
 
@@ -287,8 +351,9 @@
                         <i data-lucide="qr-code" class="pix-title-icon"></i>
                         <h3>Presente Inteligente via Pix</h3>
                     </div>
-                    <p class="pix-text">Você pode fazer uma transferência de qualquer valor ou pagar a cota selecionada acima diretamente usando o QR Code ou copiando a chave Pix abaixo.</p>
-                    
+                    <p class="pix-text">Você pode fazer uma transferência de qualquer valor ou pagar a cota selecionada
+                        acima diretamente usando o QR Code ou copiando a chave Pix abaixo.</p>
+
                     <div class="pix-visual-container">
                         <!-- QR Code ilustrativo (decorativo) -->
                         <div class="pix-qrcode-wrapper">
@@ -306,18 +371,20 @@
                         <div class="pix-key-wrapper">
                             <label for="pixKeyField">Chave Pix (E-mail):</label>
                             <div class="pix-copy-input-group">
-                                <input type="text" id="pixKeyField" class="pix-key-input" value="felipe_gusmao15@hotmail.com" readonly>
+                                <input type="text" id="pixKeyField" class="pix-key-input"
+                                    value="felipe_gusmao15@hotmail.com" readonly>
                                 <button class="btn-copy-pix" id="copyPixBtn" aria-label="Copiar chave Pix">
                                     <i data-lucide="copy" class="btn-icon"></i> <span id="copyBtnText">Copiar</span>
                                 </button>
                             </div>
                             <span class="pix-success-toast" id="pixToast">Chave Pix copiada com sucesso!</span>
-                            
+
                             <!-- Exibe o presente selecionado pelo convidado — atualizado pelo JavaScript -->
                             <div class="selected-gift-banner" id="selectedGiftBanner">
                                 <p>Cota selecionada: <strong id="selectedGiftName">Nenhum</strong></p>
                                 <p>Valor sugerido: <strong id="selectedGiftValue">R$ 0,00</strong></p>
-                                <button class="btn-clear-gift" id="clearGiftBtn" title="Cancelar seleção">Remover seleção</button>
+                                <button class="btn-clear-gift" id="clearGiftBtn" title="Cancelar seleção">Remover
+                                    seleção</button>
                             </div>
                         </div>
                     </div>
@@ -330,9 +397,10 @@
             <div class="container">
                 <div class="section-header">
                     <span class="section-subtitle">Confirme sua Presença</span>
-                    
+
                     <div class="divider"></div>
-                    <p class="section-intro">Por favor, confirme sua presença até o dia <strong>08 de Janeiro de 2027</strong> para que possamos organizar tudo com muito carinho.</p>
+                    <p class="section-intro">Por favor, confirme sua presença até o dia <strong>08 de Janeiro de
+                            2027</strong> para que possamos organizar tudo com muito carinho.</p>
                 </div>
 
                 <!-- Cartão com o formulário de confirmação -->
@@ -342,12 +410,14 @@
                             <div class="form-row-2">
                                 <div class="form-group">
                                     <label for="rsvpName">Nome Completo</label>
-                                    <input type="text" id="rsvpName" name="name" placeholder="Digite seu nome completo" required>
+                                    <input type="text" id="rsvpName" name="name" placeholder="Digite seu nome completo"
+                                        required>
                                     <span class="form-error" id="rsvpNameError">O nome é obrigatório.</span>
                                 </div>
                                 <div class="form-group">
                                     <label for="rsvpEmail">E-mail</label>
-                                    <input type="email" id="rsvpEmail" name="email" placeholder="seuemail@exemplo.com" required>
+                                    <input type="email" id="rsvpEmail" name="email" placeholder="seuemail@exemplo.com"
+                                        required>
                                     <span class="form-error" id="rsvpEmailError">Digite um e-mail válido.</span>
                                 </div>
                             </div>
@@ -360,7 +430,8 @@
                                         <option value="yes">Sim, irei comparecer</option>
                                         <option value="no">Infelizmente não poderei ir</option>
                                     </select>
-                                    <span class="form-error" id="rsvpAttendingError">Selecione se irá comparecer ou não.</span>
+                                    <span class="form-error" id="rsvpAttendingError">Selecione se irá comparecer ou
+                                        não.</span>
                                 </div>
                                 <div class="form-group" id="guestsGroup">
                                     <label for="rsvpGuests">Quantidade de Acompanhantes</label>
@@ -375,7 +446,8 @@
 
                             <div class="form-group">
                                 <label for="rsvpMessage">Mensagem / Restrições Alimentares (Opcional)</label>
-                                <textarea id="rsvpMessage" name="message" rows="4" placeholder="Deixe uma mensagem opcional para os noivos ou nos avise sobre restrições alimentares (ex: vegetariano, intolerância a glúten)."></textarea>
+                                <textarea id="rsvpMessage" name="message" rows="4"
+                                    placeholder="Deixe uma mensagem opcional para os noivos ou nos avise sobre restrições alimentares (ex: vegetariano, intolerância a glúten)."></textarea>
                             </div>
 
                             <button type="submit" class="btn-primary btn-submit-rsvp" id="rsvpSubmitBtn">
@@ -390,7 +462,8 @@
                             <i data-lucide="heart-handshake" class="success-icon"></i>
                         </div>
                         <h3>Confirmação Recebida!</h3>
-                        <p id="rsvpSuccessMessage">Sua resposta foi registrada com sucesso. Obrigado por fazer parte deste momento especial com a gente!</p>
+                        <p id="rsvpSuccessMessage">Sua resposta foi registrada com sucesso. Obrigado por fazer parte
+                            deste momento especial com a gente!</p>
                         <button class="btn-secondary" id="rsvpEditBtn">Refazer Confirmação</button>
                     </div>
                 </div>
@@ -404,7 +477,8 @@
                     <span class="section-subtitle">Carinho dos Convidados</span>
                     <h2 class="section-title">Mural de Recados</h2>
                     <div class="divider"></div>
-                    <p class="section-intro">Deixe seus votos de felicidade, conselhos amorosos ou simplesmente uma mensagem carinhosa para os noivos!</p>
+                    <p class="section-intro">Deixe seus votos de felicidade, conselhos amorosos ou simplesmente uma
+                        mensagem carinhosa para os noivos!</p>
                 </div>
 
                 <div class="guestbook-grid">
@@ -419,7 +493,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="gbMessage">Mensagem de Carinho</label>
-                                <textarea id="gbMessage" name="gbMessage" rows="5" placeholder="Escreva aqui sua mensagem para Felipe e Sarah..." required></textarea>
+                                <textarea id="gbMessage" name="gbMessage" rows="5"
+                                    placeholder="Escreva aqui sua mensagem para Felipe e Sarah..." required></textarea>
                                 <span class="form-error" id="gbMessageError">A mensagem não pode estar em branco.</span>
                             </div>
                             <button type="submit" class="btn-primary btn-block" id="gbSubmitBtn">
@@ -453,6 +528,7 @@
     </footer>
 
     <!-- Arquivo JavaScript principal -->
-    <script type="module" src="app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
+
 </html>
