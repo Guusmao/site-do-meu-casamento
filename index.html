@@ -405,53 +405,44 @@
                 <!-- Cartão com o formulário de confirmação -->
                 <div class="rsvp-card-wrapper">
                     <div class="rsvp-form-container" id="rsvpFormContainer">
-                        <form id="rsvpForm" novalidate>
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label for="rsvpName">Nome Completo</label>
-                                    <input type="text" id="rsvpName" name="name" placeholder="Digite seu nome completo"
-                                        required>
-                                    <span class="form-error" id="rsvpNameError">O nome é obrigatório.</span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="rsvpEmail">E-mail</label>
-                                    <input type="email" id="rsvpEmail" name="email" placeholder="seuemail@exemplo.com"
-                                        required>
-                                    <span class="form-error" id="rsvpEmailError">Digite um e-mail válido.</span>
-                                </div>
-                            </div>
 
-                            <div class="form-row-2">
-                                <div class="form-group">
-                                    <label for="rsvpAttending">Você irá comparecer?</label>
-                                    <select id="rsvpAttending" name="attending" required>
-                                        <option value="" disabled selected>Selecione uma opção</option>
-                                        <option value="yes">Sim, irei comparecer</option>
-                                        <option value="no">Infelizmente não poderei ir</option>
-                                    </select>
-                                    <span class="form-error" id="rsvpAttendingError">Selecione se irá comparecer ou
-                                        não.</span>
-                                </div>
-                                <div class="form-group" id="guestsGroup">
-                                    <label for="rsvpGuests">Quantidade de Acompanhantes</label>
-                                    <select id="rsvpGuests" name="guests">
-                                        <option value="0" selected>Apenas eu (0 acompanhantes)</option>
-                                        <option value="1">1 acompanhante</option>
-                                        <option value="2">2 acompanhantes</option>
-                                        <option value="3">3 acompanhantes</option>
-                                    </select>
-                                </div>
+                        <!-- ETAPA 1: buscar o grupo pelo nome do responsável pelo convite -->
+                        <div id="rsvpEtapaBusca">
+                            <div class="form-group" style="position:relative;">
+                                <label for="rsvpBusca">Digite o nome usado no seu convite</label>
+                                <input type="text" id="rsvpBusca" autocomplete="off"
+                                    placeholder="Ex: Tio Negão, Dudinha, Pai...">
+                                <span class="form-hint">Comece a digitar e selecione seu nome na lista.</span>
+                                <div id="rsvpSugestoes" class="rsvp-sugestoes"></div>
                             </div>
+                            <p class="form-error" id="rsvpBuscaError" style="display:none;"></p>
+                        </div>
+
+                        <!-- ETAPA 2: aparece depois de selecionar o grupo -->
+                        <form id="rsvpForm" novalidate style="display:none;">
+                            <input type="hidden" id="rsvpGrupoId">
 
                             <div class="form-group">
-                                <label for="rsvpMessage">Mensagem / Restrições Alimentares (Opcional)</label>
-                                <textarea id="rsvpMessage" name="message" rows="4"
-                                    placeholder="Deixe uma mensagem opcional para os noivos ou nos avise sobre restrições alimentares (ex: vegetariano, intolerância a glúten)."></textarea>
+                                <p>Convite de <strong id="rsvpGrupoResponsavel"></strong> —
+                                    até <strong id="rsvpGrupoMax"></strong> pessoa(s).</p>
+                            </div>
+
+                            <div id="rsvpNomesContainer"></div>
+
+                            <button type="button" class="btn-secondary" id="rsvpAdicionarNome" style="margin-bottom:16px;">
+                                + Adicionar convidado
+                            </button>
+
+                            <div class="form-group">
+                                <label for="rsvpEmail">Seu e-mail (para receber o ingresso digital)</label>
+                                <input type="email" id="rsvpEmail" name="email" placeholder="seuemail@exemplo.com" required>
+                                <span class="form-error" id="rsvpEmailError">Digite um e-mail válido.</span>
                             </div>
 
                             <button type="submit" class="btn-primary btn-submit-rsvp" id="rsvpSubmitBtn">
                                 Confirmar Presença <i data-lucide="send" class="btn-icon-right"></i>
                             </button>
+                            <button type="button" class="btn-secondary" id="rsvpVoltarBtn">Voltar</button>
                         </form>
                     </div>
 

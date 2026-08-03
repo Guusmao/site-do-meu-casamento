@@ -295,110 +295,194 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ==========================================================================
-       6. FORMULÁRIO DE CONFIRMAÇÃO DE PRESENÇA (RSVP) — INTEGRADO COM SUPABASE
+       6. CONFIRMAÇÃO DE PRESENÇA (RSVP) — LISTA FECHADA + QR CODE POR GRUPO
+       Fluxo: busca pelo nome do responsável (Edge Function) -> seleciona grupo
+       -> preenche nomes de quem vai -> confirma (Edge Function gera o QR e
+       dispara o email). Tudo validado no servidor, nunca no navegador.
        ========================================================================== */
-    const rsvpForm = document.getElementById('rsvpForm');
+    const SUPABASE_FUNCTIONS_URL = `${supabaseUrl}/functions/v1`;
+
     const rsvpFormContainer = document.getElementById('rsvpFormContainer');
     const rsvpSuccessContainer = document.getElementById('rsvpSuccessContainer');
     const rsvpSuccessMessage = document.getElementById('rsvpSuccessMessage');
     const rsvpEditBtn = document.getElementById('rsvpEditBtn');
-    const rsvpAttending = document.getElementById('rsvpAttending');
-    const guestsGroup = document.getElementById('guestsGroup');
-    const rsvpGuests = document.getElementById('rsvpGuests');
 
-    // Mostra ou esconde o campo de acompanhantes conforme a resposta
-    rsvpAttending.addEventListener('change', () => {
-        if (rsvpAttending.value === 'no') {
-            guestsGroup.classList.add('hidden');
-            rsvpGuests.value = '0';
-        } else {
-            guestsGroup.classList.remove('hidden');
+    const rsvpEtapaBusca = document.getElementById('rsvpEtapaBusca');
+    const rsvpBusca = document.getElementById('rsvpBusca');
+    const rsvpSugestoes = document.getElementById('rsvpSugestoes');
+    const rsvpBuscaError = document.getElementById('rsvpBuscaError');
+
+    const rsvpForm = document.getElementById('rsvpForm');
+    const rsvpGrupoId = document.getElementById('rsvpGrupoId');
+    const rsvpGrupoResponsavel = document.getElementById('rsvpGrupoResponsavel');
+    const rsvpGrupoMax = document.getElementById('rsvpGrupoMax');
+    const rsvpNomesContainer = document.getElementById('rsvpNomesContainer');
+    const rsvpAdicionarNome = document.getElementById('rsvpAdicionarNome');
+    const rsvpVoltarBtn = document.getElementById('rsvpVoltarBtn');
+    const rsvpEmail = document.getElementById('rsvpEmail');
+    const rsvpSubmitBtn = document.getElementById('rsvpSubmitBtn');
+
+    let grupoAtual = null; // { grupo_id, responsavel, quantidade_maxima }
+
+    const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
+
+    // Cria uma linha de "nome + vai/não vai"
+    function criarLinhaNome(valor = '') {
+        const linha = document.createElement('div');
+        linha.className = 'form-row-2 rsvp-linha-nome';
+        linha.innerHTML = `
+            <div class="form-group">
+                <input type="text" class="rsvp-nome-input" placeholder="Nome do convidado" value="${valor}">
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+                <select class="rsvp-vai-select">
+                    <option value="sim" selected>Vai comparecer</option>
+                    <option value="nao">Não vai comparecer</option>
+                </select>
+                <button type="button" class="rsvp-remover-nome" title="Remover" aria-label="Remover">✕</button>
+            </div>`;
+        linha.querySelector('.rsvp-remover-nome').addEventListener('click', () => {
+            if (rsvpNomesContainer.children.length > 1) linha.remove();
+        });
+        return linha;
+    }
+
+    // Busca com debounce enquanto o usuário digita
+    let buscaTimeout = null;
+    rsvpBusca.addEventListener('input', () => {
+        clearTimeout(buscaTimeout);
+        const termo = rsvpBusca.value.trim();
+        rsvpBuscaError.style.display = 'none';
+        if (termo.length < 2) {
+            rsvpSugestoes.innerHTML = '';
+            return;
         }
+        buscaTimeout = setTimeout(async () => {
+            try {
+                const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/buscar-grupo`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ termo })
+                });
+                const data = await resp.json();
+                renderSugestoes(data.resultados || []);
+            } catch (err) {
+                console.error('Erro ao buscar convidado:', err);
+            }
+        }, 300);
     });
 
-    // Adiciona ou remove a classe de erro no campo do formulário
-    const toggleInputError = (input, isValid) => {
-        const group = input.closest('.form-group');
-        if (isValid) {
-            group.classList.remove('error');
-        } else {
-            group.classList.add('error');
+    function renderSugestoes(resultados) {
+        if (resultados.length === 0) {
+            rsvpSugestoes.innerHTML = '<div class="rsvp-sugestao-vazia">Nenhum nome encontrado. Confira a grafia do convite.</div>';
+            return;
         }
-    };
+        rsvpSugestoes.innerHTML = '';
+        resultados.forEach((r) => {
+            const item = document.createElement('div');
+            item.className = 'rsvp-sugestao-item';
+            item.textContent = r.ja_confirmado ? `${r.responsavel} (já confirmado — clique para editar)` : r.responsavel;
+            item.addEventListener('click', () => selecionarGrupo(r));
+            rsvpSugestoes.appendChild(item);
+        });
+    }
 
-    // Valida o formato do e-mail
-    const validateEmail = (email) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
-    };
+    function selecionarGrupo(grupo) {
+        grupoAtual = grupo;
+        rsvpGrupoId.value = grupo.grupo_id;
+        rsvpGrupoResponsavel.textContent = grupo.responsavel;
+        rsvpGrupoMax.textContent = grupo.quantidade_maxima ?? '';
+
+        rsvpNomesContainer.innerHTML = '';
+        rsvpNomesContainer.appendChild(criarLinhaNome());
+
+        rsvpEtapaBusca.style.display = 'none';
+        rsvpForm.style.display = 'block';
+        rsvpSugestoes.innerHTML = '';
+    }
+
+    rsvpAdicionarNome.addEventListener('click', () => {
+        const max = grupoAtual?.quantidade_maxima ?? 1;
+        if (rsvpNomesContainer.children.length >= max) {
+            alert(`Este convite permite no máximo ${max} pessoa(s).`);
+            return;
+        }
+        rsvpNomesContainer.appendChild(criarLinhaNome());
+    });
+
+    rsvpVoltarBtn.addEventListener('click', () => {
+        rsvpForm.style.display = 'none';
+        rsvpEtapaBusca.style.display = 'block';
+        rsvpBusca.value = '';
+        grupoAtual = null;
+    });
 
     rsvpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const nameInput = document.getElementById('rsvpName');
-        const emailInput = document.getElementById('rsvpEmail');
-        const attendingSelect = document.getElementById('rsvpAttending');
-        const submitBtn = document.getElementById('rsvpSubmitBtn');
+        const nomes = Array.from(rsvpNomesContainer.querySelectorAll('.rsvp-linha-nome')).map((linha) => ({
+            nome: linha.querySelector('.rsvp-nome-input').value.trim(),
+            vai: linha.querySelector('.rsvp-vai-select').value === 'sim'
+        })).filter((n) => n.nome.length > 0);
 
-        // Verifica se os campos obrigatórios são válidos
-        const isNameValid = nameInput.value.trim().length > 2;
-        const isEmailValid = validateEmail(emailInput.value.trim());
-        const isAttendingValid = attendingSelect.value !== '';
+        const emailValido = validateEmail(rsvpEmail.value.trim());
+        rsvpEmail.closest('.form-group').classList.toggle('error', !emailValido);
 
-        toggleInputError(nameInput, isNameValid);
-        toggleInputError(emailInput, isEmailValid);
-        toggleInputError(attendingSelect, isAttendingValid);
+        if (nomes.length === 0) {
+            alert('Adicione ao menos um nome.');
+            return;
+        }
+        if (!emailValido) return;
 
-        if (isNameValid && isEmailValid && isAttendingValid) {
-            // Desabilita o botão para evitar envios duplicados
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Enviando...';
+        rsvpSubmitBtn.disabled = true;
+        rsvpSubmitBtn.textContent = 'Enviando...';
 
-            // Coleta os dados do formulário
-            const guestResponse = {
-                nome: nameInput.value.trim(),
-                email: emailInput.value.trim(),
-                comparecendo: attendingSelect.value,
-                acompanhantes: attendingSelect.value === 'yes' ? parseInt(rsvpGuests.value) : 0,
-                mensagem: document.getElementById('rsvpMessage').value.trim()
-            };
+        try {
+            const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/confirmar-presenca`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    grupo_id: rsvpGrupoId.value,
+                    email: rsvpEmail.value.trim(),
+                    nomes
+                })
+            });
+            const data = await resp.json();
 
-            // Salva no Supabase — substitui caso o e-mail já exista
-            const { error } = await supabase
-                .from('confirmacoes')
-                .upsert(guestResponse, { onConflict: 'email' });
-
-            if (error) {
-                console.error('Erro ao salvar confirmação:', error);
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Confirmar Presença';
-                alert('Ocorreu um erro ao confirmar sua presença. Tente novamente.');
+            if (!resp.ok) {
+                alert(data.error || 'Ocorreu um erro ao confirmar sua presença.');
+                rsvpSubmitBtn.disabled = false;
+                rsvpSubmitBtn.innerHTML = 'Confirmar Presença <i data-lucide="send" class="btn-icon-right"></i>';
+                lucide.createIcons();
                 return;
             }
 
-            // Exibe a mensagem de sucesso após o envio
             rsvpFormContainer.style.display = 'none';
             rsvpSuccessContainer.classList.add('active');
 
-            // Monta a mensagem de confirmação personalizada
-            if (guestResponse.comparecendo === 'yes') {
-                const companionText = guestResponse.acompanhantes === 0
-                    ? 'Apenas você.'
-                    : `Você e + ${guestResponse.acompanhantes} acompanhante(s).`;
-                rsvpSuccessMessage.innerHTML = `Que alegria, <strong>${guestResponse.nome}</strong>! Sua presença está confirmada com sucesso.<br><br>Detalhe dos convidados: <em>${companionText}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`;
-            } else {
-                rsvpSuccessMessage.innerHTML = `Obrigado por nos avisar, <strong>${guestResponse.nome}</strong>. Sentiremos a sua falta no nosso grande dia, mas agradecemos imensamente o seu carinho e votos de felicidade!`;
-            }
+            const vao = data.nomes_confirmados || [];
+            rsvpSuccessMessage.innerHTML = vao.length > 0
+                ? `Confirmado! Enviamos o ingresso digital com QR Code para <strong>${rsvpEmail.value.trim()}</strong>.<br><br>Convidados confirmados: <em>${vao.join(', ')}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`
+                : `Obrigado por nos avisar! Sentiremos a falta de vocês no nosso grande dia.`;
+        } catch (err) {
+            console.error('Erro ao confirmar presença:', err);
+            alert('Ocorreu um erro ao confirmar sua presença. Tente novamente.');
+            rsvpSubmitBtn.disabled = false;
+            rsvpSubmitBtn.innerHTML = 'Confirmar Presença <i data-lucide="send" class="btn-icon-right"></i>';
+            lucide.createIcons();
         }
     });
 
-    // Volta ao formulário para editar a confirmação
+    // Volta ao formulário para uma nova consulta
     rsvpEditBtn.addEventListener('click', () => {
         rsvpSuccessContainer.classList.remove('active');
         rsvpFormContainer.style.display = 'block';
-        const submitBtn = document.getElementById('rsvpSubmitBtn');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Confirmar Presença <i data-lucide="send" class="btn-icon-right"></i>';
+        rsvpForm.style.display = 'none';
+        rsvpEtapaBusca.style.display = 'block';
+        rsvpBusca.value = '';
+        grupoAtual = null;
+        rsvpSubmitBtn.disabled = false;
+        rsvpSubmitBtn.innerHTML = 'Confirmar Presença <i data-lucide="send" class="btn-icon-right"></i>';
         lucide.createIcons();
     });
 
