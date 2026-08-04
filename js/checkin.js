@@ -5,6 +5,7 @@
 // na hora e enviada junto de cada verificação.
 
 const SUPABASE_URL = 'https://faccbfidybfsoplaeqjw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhY2NiZmlkeWJmc29wbGFlcWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTY4ODYsImV4cCI6MjA5Njc5Mjg4Nn0.SNPbyvdHeICpuswamoUeJ-bAUtMosv7RvlVoxYyOTc8';
 const FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
 const telaSenha = document.getElementById('telaSenha');
@@ -50,7 +51,11 @@ async function consultarToken(token) {
     try {
         const resp = await fetch(`${FUNCTIONS_URL}/validar-checkin`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'apikey': SUPABASE_ANON_KEY
+            },
             body: JSON.stringify({ token, senha_portaria: senhaPortaria })
         });
         const data = await resp.json();
@@ -96,7 +101,11 @@ function renderResultado(token, data) {
             try {
                 const resp = await fetch(`${FUNCTIONS_URL}/validar-checkin`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY
+                    },
                     body: JSON.stringify({ token, senha_portaria: senhaPortaria, nome: btn.dataset.nome })
                 });
                 const result = await resp.json();

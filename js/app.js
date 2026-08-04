@@ -361,7 +361,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/buscar-grupo`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${supabaseKey}`,
+                        'apikey': supabaseKey
+                    },
                     body: JSON.stringify({ termo })
                 });
                 const data = await resp.json();
@@ -440,7 +444,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/confirmar-presenca`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseKey}`,
+                    'apikey': supabaseKey
+                },
                 body: JSON.stringify({
                     grupo_id: rsvpGrupoId.value,
                     email: rsvpEmail.value.trim(),
