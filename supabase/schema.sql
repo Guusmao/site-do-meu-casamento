@@ -22,10 +22,13 @@ create index if not exists idx_convidados_lista_busca
 create table if not exists public.confirmacoes (
   id uuid primary key default gen_random_uuid(),
   grupo_id uuid not null references public.convidados_lista(id),
-  email text not null,
+  whatsapp text not null,
   nomes_confirmados jsonb not null default '[]'::jsonb,  -- [{"nome": "João", "vai": true}, ...]
   qr_token text unique,               -- token assinado (HMAC) que vira o QR Code
   qr_enviado_em timestamptz,
+  lembrete_aquecimento_enviado_em timestamptz,
+  lembrete_logistica_enviado_em timestamptz,
+  lembrete_clima_enviado_em timestamptz,
   criado_em timestamptz not null default now(),
   atualizado_em timestamptz not null default now(),
   unique (grupo_id)                   -- só uma confirmação por grupo (pode editar, não duplicar)
