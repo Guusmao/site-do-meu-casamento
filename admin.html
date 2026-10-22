@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Casamento Sarah & Felipe</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+    :root {
+        --bg: #1e1c19;
+        --card: #2a2621;
+        --accent: #f2c14e;
+        --text: #f3efe9;
+        --muted: #b7ada0;
+        --danger: #d84a4a;
+        --success: #4caf7d;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px 16px;
+    }
+    h1 { font-size: 1.3rem; margin-bottom: 4px; text-align:center; }
+    h2 { font-size: 1.05rem; margin: 0 0 12px; }
+    p.sub { color: var(--muted); font-size: 0.85rem; margin-top: 0; text-align:center; }
+    .card {
+        background: var(--card);
+        border-radius: 16px;
+        padding: 20px;
+        max-width: 720px;
+        width: 100%;
+        margin-top: 16px;
+    }
+    input, select, button {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #46403a;
+        background: #1e1c19;
+        color: var(--text);
+        font-size: 0.95rem;
+    }
+    input, select { width: 100%; }
+    button {
+        background: var(--accent);
+        color: #1e1c19;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    button.sec { background: #46403a; color: var(--text); }
+    button.perigo { background: transparent; color: #ff9d9d; border: 1px solid #6b3a3a; }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .linha { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .linha > input, .linha > select { flex: 1 1 140px; }
+    .resumo { display: flex; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+    .resumo strong { color: var(--text); }
+    .item {
+        background: #1e1c19;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 10px;
+    }
+    .item-topo { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .muted { color: var(--muted); font-size: 0.85rem; }
+    .tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; background: #46403a; }
+    .tag.ok { background: rgba(76,175,125,0.2); color: #8fe0b6; }
+    .tag.nao { background: rgba(216,74,74,0.15); color: #ff9d9d; }
+    .pessoa { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid #2f2b26; flex-wrap: wrap; }
+    .pessoa:first-of-type { border-top: none; }
+    .pessoa button { padding: 6px 10px; font-size: 0.8rem; }
+    .msg-erro {
+        background: rgba(216,74,74,0.15);
+        color: #ff9d9d;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        margin-top: 12px;
+    }
+    .coluna { width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<h1>Admin — Sarah & Felipe</h1>
+<p class="sub">Lista de convidados, pedidos pendentes e exportação</p>
+
+<!-- Tela de senha -->
+<div class="card" id="telaSenha" style="max-width:420px;">
+    <div class="linha">
+        <input type="password" id="senhaInput" placeholder="Senha de admin">
+        <button id="btnEntrar">Entrar</button>
+    </div>
+    <div id="senhaErro" class="msg-erro hidden"></div>
+</div>
+
+<div id="telaAdmin" class="coluna hidden">
+    <div class="card">
+        <div class="resumo" id="resumo"></div>
+        <div class="linha">
+            <button id="btnExportar">Exportar planilha (CSV)</button>
+            <button id="btnAtualizar" class="sec">Atualizar</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Pedidos pendentes ("não achei meu convite")</h2>
+        <div id="listaPendentes"></div>
+    </div>
+
+    <div class="card">
+        <h2>Grupos</h2>
+        <div class="linha">
+            <input type="search" id="filtroGrupos" placeholder="Filtrar por responsável ou nome...">
+            <select id="filtroStatus" style="flex:0 1 200px;">
+                <option value="">Todos</option>
+                <option value="sem_nomes">Sem nomes cadastrados</option>
+                <option value="incompleto">Com vagas em aberto</option>
+                <option value="confirmado">Confirmados</option>
+            </select>
+        </div>
+        <div id="listaGrupos"></div>
+    </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>
