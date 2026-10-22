@@ -1,8 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // Conexão com o Supabase
-const supabaseUrl = 'https://faccbfidybfsoplaeqjw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhY2NiZmlkeWJmc29wbGFlcWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTY4ODYsImV4cCI6MjA5Njc5Mjg4Nn0.SNPbyvdHeICpuswamoUeJ-bAUtMosv7RvlVoxYyOTc8';
+// Endereço e chave vêm de js/config.js (ou js/config.local.js quando testando no computador)
+const supabaseUrl = window.SUPABASE_CONFIG.url;
+const supabaseKey = window.SUPABASE_CONFIG.anonKey;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -408,7 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderSugestoes(resultados) {
         if (resultados.length === 0) {
-            rsvpSugestoes.innerHTML = '<div class="rsvp-sugestao-vazia">Nenhum nome encontrado. Confira a grafia do convite.</div>';
+            rsvpSugestoes.innerHTML = `<div class="rsvp-sugestao-vazia">Nenhum nome encontrado. Confira a grafia do convite
+                ou <button type="button" class="rsvp-link">avise a gente</button>.</div>`;
+            // A lista cobre o link "Não encontrou seu convite?", então o atalho fica aqui também
+            rsvpSugestoes.querySelector('.rsvp-link').addEventListener('click', () => {
+                document.getElementById('rsvpNaoAcheiBtn').click();
+            });
             return;
         }
         rsvpSugestoes.innerHTML = '';
@@ -557,6 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rsvpPendenteEnviarBtn = document.getElementById('rsvpPendenteEnviarBtn');
 
     rsvpNaoAcheiBtn.addEventListener('click', () => {
+        rsvpSugestoes.innerHTML = '';
         rsvpEtapaBusca.style.display = 'none';
         rsvpPendenteForm.style.display = 'block';
         rsvpPendenteNome.value = rsvpBusca.value.trim();
@@ -691,6 +698,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderMessages(data);
+    };
+
+    // Marca/desmarca o campo com erro (a borda vermelha e a mensagem vêm do CSS .form-group.error)
+    const toggleInputError = (input, isValid) => {
+        input.closest('.form-group').classList.toggle('error', !isValid);
     };
 
     // Envia o recado ao submeter o formulário

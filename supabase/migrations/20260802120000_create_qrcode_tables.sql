@@ -1,5 +1,4 @@
 -- Migration: create qrcode invitation tables and RLS
-create extension if not exists unaccent;
 
 create table if not exists public.convidados_lista (
   id uuid primary key default gen_random_uuid(),
@@ -10,8 +9,8 @@ create table if not exists public.convidados_lista (
   criado_em timestamptz not null default now()
 );
 
-create index if not exists idx_convidados_lista_busca
-  on public.convidados_lista using gin (to_tsvector('simple', unaccent(responsavel)));
+-- Sem índice com unaccent(): a função não é IMMUTABLE (erro 42P17).
+-- A busca é feita com ilike na Edge Function buscar-grupo.
 
 create table if not exists public.confirmacoes (
   id uuid primary key default gen_random_uuid(),
