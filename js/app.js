@@ -268,13 +268,15 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedGiftBanner.classList.remove('active');
     };
 
-    clearGiftBtn.addEventListener('click', (e) => {
+    // A seção de presentes pode estar fora do index.html: sem ela, não registra nada
+    // (antes isso dava erro e travava o RSVP e o mural, que vêm depois).
+    clearGiftBtn?.addEventListener('click', (e) => {
         e.preventDefault();
         removeGiftSelection();
     });
 
     // Copiador da chave Pix
-    copyPixBtn.addEventListener('click', () => {
+    copyPixBtn?.addEventListener('click', () => {
         const keyText = pixKeyField.value;
         navigator.clipboard.writeText(keyText).then(() => {
             // Exibe confirmação visual de cópia

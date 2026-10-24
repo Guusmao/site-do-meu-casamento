@@ -986,6 +986,11 @@ p {
     background-color: var(--color-bg);
 }
 
+.registry-cta {
+    display: flex;
+    justify-content: center;
+}
+
 .gift-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
