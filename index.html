@@ -321,7 +321,29 @@
                                 <div id="rsvpSugestoes" class="rsvp-sugestoes"></div>
                             </div>
                             <p class="form-error" id="rsvpBuscaError" style="display:none;"></p>
+                            <button type="button" class="rsvp-link" id="rsvpNaoAcheiBtn">Não encontrou seu convite?</button>
                         </div>
+
+                        <!-- "Não achei meu convite": vira um pedido pendente para os noivos ligarem ao grupo certo -->
+                        <form id="rsvpPendenteForm" novalidate style="display:none;">
+                            <p class="form-hint" style="margin-bottom:16px;">Deixe seu nome completo e um contato. Nós vamos
+                                encontrar o seu convite e te avisar como confirmar.</p>
+                            <div class="form-group">
+                                <label for="rsvpPendenteNome">Seu nome completo</label>
+                                <input type="text" id="rsvpPendenteNome" maxlength="120" placeholder="Nome e sobrenome">
+                            </div>
+                            <div class="form-group">
+                                <label for="rsvpPendenteContato">WhatsApp ou e-mail</label>
+                                <input type="text" id="rsvpPendenteContato" maxlength="120" placeholder="Para falarmos com você">
+                            </div>
+                            <div class="form-group">
+                                <label for="rsvpPendenteMensagem">Quem mais vem com você? (opcional)</label>
+                                <textarea id="rsvpPendenteMensagem" rows="3" maxlength="500"
+                                    placeholder="Ex: minha esposa Ana Souza e meu filho Pedro Souza"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary btn-submit-rsvp" id="rsvpPendenteEnviarBtn">Enviar</button>
+                            <button type="button" class="btn-secondary" id="rsvpPendenteVoltarBtn">Voltar</button>
+                        </form>
 
                         <!-- ETAPA 2: aparece depois de selecionar o grupo -->
                         <form id="rsvpForm" novalidate style="display:none;">
@@ -330,6 +352,9 @@
                             <div class="form-group">
                                 <p>Convite de <strong id="rsvpGrupoResponsavel"></strong> —
                                     até <strong id="rsvpGrupoMax"></strong> pessoa(s).</p>
+                                <span class="form-hint">Coloque nome e sobrenome de cada pessoa do convite, mesmo de quem
+                                    não vai. Depois de enviados, os nomes não podem ser trocados por aqui — se precisar
+                                    corrigir algo, fale com a gente.</span>
                             </div>
 
                             <div id="rsvpNomesContainer"></div>
@@ -423,6 +448,7 @@
     </footer>
 
     <!-- Arquivo JavaScript principal -->
+    <script src="js/config.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 

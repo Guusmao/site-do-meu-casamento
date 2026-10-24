@@ -1,8 +1,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // Conexão com o Supabase
-const supabaseUrl = 'https://faccbfidybfsoplaeqjw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhY2NiZmlkeWJmc29wbGFlcWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTY4ODYsImV4cCI6MjA5Njc5Mjg4Nn0.SNPbyvdHeICpuswamoUeJ-bAUtMosv7RvlVoxYyOTc8';
+// Endereço e chave vêm de js/config.js (ou js/config.local.js quando testando no computador)
+const supabaseUrl = window.SUPABASE_CONFIG.url;
+const supabaseKey = window.SUPABASE_CONFIG.anonKey;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -268,13 +269,15 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedGiftBanner.classList.remove('active');
     };
 
-    clearGiftBtn.addEventListener('click', (e) => {
+    // A seção de presentes pode estar fora do index.html: sem ela, não registra nada
+    // (antes isso dava erro e travava o RSVP e o mural, que vêm depois).
+    clearGiftBtn?.addEventListener('click', (e) => {
         e.preventDefault();
         removeGiftSelection();
     });
 
     // Copiador da chave Pix
-    copyPixBtn.addEventListener('click', () => {
+    copyPixBtn?.addEventListener('click', () => {
         const keyText = pixKeyField.value;
         navigator.clipboard.writeText(keyText).then(() => {
             // Exibe confirmação visual de cópia
@@ -326,24 +329,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
 
-    // Cria uma linha de "nome + vai/não vai"
-    function criarLinhaNome(valor = '') {
+    const escapeAttr = (str) => String(str ?? '').replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const seletorVai = (vai = true) => `
+        <select class="rsvp-vai-select">
+            <option value="sim" ${vai ? 'selected' : ''}>Vai comparecer</option>
+            <option value="nao" ${vai ? '' : 'selected'}>Não vai comparecer</option>
+        </select>`;
+
+    // Pessoa nova: nome + sobrenome + parentesco (opcional) + vai/não vai
+    function criarPessoaNova() {
         const linha = document.createElement('div');
-        linha.className = 'form-row-2 rsvp-linha-nome';
+        linha.className = 'rsvp-pessoa rsvp-pessoa-nova';
         linha.innerHTML = `
-            <div class="form-group">
-                <input type="text" class="rsvp-nome-input" placeholder="Nome do convidado" value="${valor}">
+            <div class="form-row-2">
+                <div class="form-group">
+                    <input type="text" class="rsvp-nome-input" placeholder="Nome" maxlength="60">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="rsvp-sobrenome-input" placeholder="Sobrenome" maxlength="60">
+                </div>
             </div>
-            <div class="form-group" style="display:flex;align-items:center;gap:10px;">
-                <select class="rsvp-vai-select">
-                    <option value="sim" selected>Vai comparecer</option>
-                    <option value="nao">Não vai comparecer</option>
-                </select>
-                <button type="button" class="rsvp-remover-nome" title="Remover" aria-label="Remover">✕</button>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <input type="text" class="rsvp-parentesco-input" placeholder="Parentesco (opcional): pai, filha..." maxlength="40">
+                </div>
+                <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+                    ${seletorVai(true)}
+                    <button type="button" class="rsvp-remover-nome" title="Remover" aria-label="Remover">✕</button>
+                </div>
             </div>`;
         linha.querySelector('.rsvp-remover-nome').addEventListener('click', () => {
             if (rsvpNomesContainer.children.length > 1) linha.remove();
         });
+        return linha;
+    }
+
+    // Pessoa já cadastrada: nome travado, só muda vai/não vai
+    function criarPessoaTravada(pessoa) {
+        const linha = document.createElement('div');
+        linha.className = 'rsvp-pessoa rsvp-pessoa-travada';
+        linha.dataset.id = pessoa.id;
+        const parentesco = pessoa.parentesco ? ` <small>(${escapeAttr(pessoa.parentesco)})</small>` : '';
+        linha.innerHTML = `
+            <div class="rsvp-pessoa-nome">${escapeAttr(pessoa.nome)} ${escapeAttr(pessoa.sobrenome)}${parentesco}</div>
+            <div class="form-group">${seletorVai(pessoa.vai)}</div>`;
         return linha;
     }
 
@@ -378,7 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderSugestoes(resultados) {
         if (resultados.length === 0) {
-            rsvpSugestoes.innerHTML = '<div class="rsvp-sugestao-vazia">Nenhum nome encontrado. Confira a grafia do convite.</div>';
+            rsvpSugestoes.innerHTML = `<div class="rsvp-sugestao-vazia">Nenhum nome encontrado. Confira a grafia do convite
+                ou <button type="button" class="rsvp-link">avise a gente</button>.</div>`;
+            // A lista cobre o link "Não encontrou seu convite?", então o atalho fica aqui também
+            rsvpSugestoes.querySelector('.rsvp-link').addEventListener('click', () => {
+                document.getElementById('rsvpNaoAcheiBtn').click();
+            });
             return;
         }
         rsvpSugestoes.innerHTML = '';
@@ -391,18 +427,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function selecionarGrupo(grupo) {
+    async function selecionarGrupo(grupo) {
         grupoAtual = grupo;
         rsvpGrupoId.value = grupo.grupo_id;
         rsvpGrupoResponsavel.textContent = grupo.responsavel;
         rsvpGrupoMax.textContent = grupo.quantidade_maxima ?? '';
+        rsvpSugestoes.innerHTML = '';
 
+        let pessoas = [];
+        try {
+            const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/buscar-grupo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseKey}`,
+                    'apikey': supabaseKey
+                },
+                body: JSON.stringify({ grupo_id: grupo.grupo_id })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error);
+            pessoas = data.pessoas || [];
+        } catch (err) {
+            console.error('Erro ao carregar o convite:', err);
+            alert('Não foi possível carregar o seu convite. Tente novamente.');
+            return;
+        }
+
+        // Nomes já cadastrados ficam travados; as vagas restantes aparecem em branco
         rsvpNomesContainer.innerHTML = '';
-        rsvpNomesContainer.appendChild(criarLinhaNome());
+        pessoas.forEach((p) => rsvpNomesContainer.appendChild(criarPessoaTravada(p)));
+        const max = grupo.quantidade_maxima ?? 1;
+        for (let i = pessoas.length; i < max; i++) {
+            rsvpNomesContainer.appendChild(criarPessoaNova());
+        }
+        rsvpAdicionarNome.style.display = pessoas.length < max ? '' : 'none';
 
         rsvpEtapaBusca.style.display = 'none';
         rsvpForm.style.display = 'block';
-        rsvpSugestoes.innerHTML = '';
     }
 
     rsvpAdicionarNome.addEventListener('click', () => {
@@ -411,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Este convite permite no máximo ${max} pessoa(s).`);
             return;
         }
-        rsvpNomesContainer.appendChild(criarLinhaNome());
+        rsvpNomesContainer.appendChild(criarPessoaNova());
     });
 
     rsvpVoltarBtn.addEventListener('click', () => {
@@ -424,16 +486,27 @@ document.addEventListener('DOMContentLoaded', () => {
     rsvpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const nomes = Array.from(rsvpNomesContainer.querySelectorAll('.rsvp-linha-nome')).map((linha) => ({
-            nome: linha.querySelector('.rsvp-nome-input').value.trim(),
-            vai: linha.querySelector('.rsvp-vai-select').value === 'sim'
-        })).filter((n) => n.nome.length > 0);
+        let faltaSobrenome = false;
+        const pessoas = Array.from(rsvpNomesContainer.querySelectorAll('.rsvp-pessoa')).map((linha) => {
+            const vai = linha.querySelector('.rsvp-vai-select').value === 'sim';
+            if (linha.dataset.id) return { id: linha.dataset.id, vai };
+            const nome = linha.querySelector('.rsvp-nome-input').value.trim();
+            const sobrenome = linha.querySelector('.rsvp-sobrenome-input').value.trim();
+            const parentesco = linha.querySelector('.rsvp-parentesco-input').value.trim();
+            if (!nome && !sobrenome) return null; // vaga deixada em branco
+            if (!nome || !sobrenome) faltaSobrenome = true;
+            return { nome, sobrenome, parentesco, vai };
+        }).filter(Boolean);
 
         const emailValido = validateEmail(rsvpEmail.value.trim());
         rsvpEmail.closest('.form-group').classList.toggle('error', !emailValido);
 
-        if (nomes.length === 0) {
+        if (pessoas.length === 0) {
             alert('Adicione ao menos um nome.');
+            return;
+        }
+        if (faltaSobrenome) {
+            alert('Preencha nome e sobrenome de cada convidado.');
             return;
         }
         if (!emailValido) return;
@@ -452,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     grupo_id: rsvpGrupoId.value,
                     email: rsvpEmail.value.trim(),
-                    nomes
+                    pessoas
                 })
             });
             const data = await resp.json();
@@ -478,6 +551,64 @@ document.addEventListener('DOMContentLoaded', () => {
             rsvpSubmitBtn.disabled = false;
             rsvpSubmitBtn.innerHTML = 'Confirmar Presença <i data-lucide="send" class="btn-icon-right"></i>';
             lucide.createIcons();
+        }
+    });
+
+    // "Não encontrou seu convite?" -> pedido pendente para os noivos
+    const rsvpNaoAcheiBtn = document.getElementById('rsvpNaoAcheiBtn');
+    const rsvpPendenteForm = document.getElementById('rsvpPendenteForm');
+    const rsvpPendenteNome = document.getElementById('rsvpPendenteNome');
+    const rsvpPendenteContato = document.getElementById('rsvpPendenteContato');
+    const rsvpPendenteMensagem = document.getElementById('rsvpPendenteMensagem');
+    const rsvpPendenteEnviarBtn = document.getElementById('rsvpPendenteEnviarBtn');
+
+    rsvpNaoAcheiBtn.addEventListener('click', () => {
+        rsvpSugestoes.innerHTML = '';
+        rsvpEtapaBusca.style.display = 'none';
+        rsvpPendenteForm.style.display = 'block';
+        rsvpPendenteNome.value = rsvpBusca.value.trim();
+    });
+
+    document.getElementById('rsvpPendenteVoltarBtn').addEventListener('click', () => {
+        rsvpPendenteForm.style.display = 'none';
+        rsvpEtapaBusca.style.display = 'block';
+    });
+
+    rsvpPendenteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome_digitado = rsvpPendenteNome.value.trim();
+        const contato = rsvpPendenteContato.value.trim();
+        if (nome_digitado.split(/\s+/).length < 2 || !contato) {
+            alert('Informe seu nome completo (nome e sobrenome) e um contato.');
+            return;
+        }
+
+        rsvpPendenteEnviarBtn.disabled = true;
+        rsvpPendenteEnviarBtn.textContent = 'Enviando...';
+        try {
+            const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/registrar-pendente`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseKey}`,
+                    'apikey': supabaseKey
+                },
+                body: JSON.stringify({ nome_digitado, contato, mensagem: rsvpPendenteMensagem.value.trim() })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error);
+
+            rsvpFormContainer.style.display = 'none';
+            rsvpSuccessContainer.classList.add('active');
+            rsvpSuccessMessage.innerHTML = 'Recebemos seu pedido! Vamos localizar o seu convite e falar com você em breve. ♥';
+            rsvpPendenteForm.reset();
+            rsvpPendenteForm.style.display = 'none';
+        } catch (err) {
+            console.error('Erro ao enviar pedido:', err);
+            alert('Ocorreu um erro ao enviar. Tente novamente.');
+        } finally {
+            rsvpPendenteEnviarBtn.disabled = false;
+            rsvpPendenteEnviarBtn.textContent = 'Enviar';
         }
     });
 
@@ -567,6 +698,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderMessages(data);
+    };
+
+    // Marca/desmarca o campo com erro (a borda vermelha e a mensagem vêm do CSS .form-group.error)
+    const toggleInputError = (input, isValid) => {
+        input.closest('.form-group').classList.toggle('error', !isValid);
     };
 
     // Envia o recado ao submeter o formulário

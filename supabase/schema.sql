@@ -13,10 +13,8 @@ create table if not exists public.convidados_lista (
   criado_em timestamptz not null default now()
 );
 
--- Busca por nome sem acento/maiúscula (autocomplete)
-create extension if not exists unaccent;
-create index if not exists idx_convidados_lista_busca
-  on public.convidados_lista using gin (to_tsvector('simple', unaccent(responsavel)));
+-- Observação: a busca por nome é feita via `ilike` na Edge Function
+-- `buscar-grupo`; não há índice sobre unaccent() (não é IMMUTABLE, erro 42P17).
 
 -- 2) CONFIRMAÇÃO (um registro por grupo, criado quando o responsável confirma)
 create table if not exists public.confirmacoes (
@@ -43,6 +41,35 @@ create table if not exists public.checkins (
   checado_por text
 );
 
+-- 4) PESSOAS DE CADA GRUPO (nome e sobrenome; cadastradas pelo próprio convidado no RSVP)
+-- Depois de cadastrada, a pessoa só pode ser marcada "vai"/"não vai" pelo site;
+-- trocar ou remover o nome só pela página admin (evita trocar quem não vai por outra pessoa).
+create table if not exists public.convidados_pessoas (
+  id uuid primary key default gen_random_uuid(),
+  grupo_id uuid not null references public.convidados_lista(id) on delete cascade,
+  nome text not null check (length(trim(nome)) > 0),
+  sobrenome text not null check (length(trim(sobrenome)) > 0),
+  parentesco text,
+  vai boolean not null default true,
+  criado_em timestamptz not null default now(),
+  atualizado_em timestamptz not null default now()
+);
+
+create unique index if not exists idx_convidados_pessoas_nome_unico
+  on public.convidados_pessoas (grupo_id, lower(trim(nome)), lower(trim(sobrenome)));
+
+-- 5) PENDENTES ("não achei meu convite" — os noivos ligam ao grupo pela página admin)
+create table if not exists public.pendentes (
+  id uuid primary key default gen_random_uuid(),
+  nome_digitado text not null,
+  contato text,
+  mensagem text,
+  status text not null default 'pendente' check (status in ('pendente','vinculado','descartado')),
+  grupo_id uuid references public.convidados_lista(id) on delete set null,
+  criado_em timestamptz not null default now(),
+  resolvido_em timestamptz
+);
+
 -- ============================================================
 -- RLS (Row Level Security)
 -- O site NUNCA fala direto com essas tabelas usando o anon key
@@ -54,6 +81,8 @@ create table if not exists public.checkins (
 alter table public.convidados_lista enable row level security;
 alter table public.confirmacoes enable row level security;
 alter table public.checkins enable row level security;
+alter table public.convidados_pessoas enable row level security;
+alter table public.pendentes enable row level security;
 
 -- Nenhuma policy criada = nenhum acesso via anon key.
 -- As Edge Functions usam a service_role key, que ignora RLS.

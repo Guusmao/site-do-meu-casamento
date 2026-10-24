@@ -4,8 +4,8 @@
 // A senha da portaria não fica salva em lugar nenhum do código — é digitada
 // na hora e enviada junto de cada verificação.
 
-const SUPABASE_URL = 'https://faccbfidybfsoplaeqjw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhY2NiZmlkeWJmc29wbGFlcWp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMTY4ODYsImV4cCI6MjA5Njc5Mjg4Nn0.SNPbyvdHeICpuswamoUeJ-bAUtMosv7RvlVoxYyOTc8';
+const SUPABASE_URL = window.SUPABASE_CONFIG.url;
+const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.anonKey;
 const FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 
 const telaSenha = document.getElementById('telaSenha');

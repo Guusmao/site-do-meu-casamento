@@ -54,3 +54,40 @@ Ela **não foi colocada em nenhum arquivo do projeto** — vai direto pro comand
 Passo 4, que grava como *secret* no servidor do Supabase. Como você a compartilhou
 aqui no chat, recomendo, por precaução, gerar uma nova chave no painel do Resend e
 revogar a antiga antes de ir para produção — é rápido e evita qualquer risco.
+
+---
+
+# Cadastro de nomes por grupo + página admin
+
+## O que muda
+- No RSVP, cada pessoa do convite é cadastrada com **nome e sobrenome** (parentesco opcional).
+  Depois de enviado, o nome fica **travado**: o convidado só consegue marcar "vai" / "não vai".
+  Quem não vai continua ocupando a vaga, então não dá para trocar por outra pessoa.
+- Botão **"Não encontrou seu convite?"**: a pessoa deixa nome + contato e o pedido
+  fica pendente para vocês ligarem ao grupo certo.
+- `admin.html` (só para os noivos, com senha): lista grupos e nomes, liga pendentes,
+  corrige/remove nomes e **exporta a planilha em CSV** (abre direto no Excel).
+  Se um grupo já confirmado for alterado, um novo QR Code é gerado e reenviado
+  (o QR antigo deixa de valer na portaria).
+
+## Passo 1 — Banco
+No SQL Editor do Supabase, rode `supabase/migrations/20261022000000_cadastro_nomes.sql`.
+
+## Passo 2 — Senha do admin (nunca vai para o código)
+```bash
+supabase secrets set ADMIN_SENHA="escolha-uma-senha-forte-so-dos-noivos"
+```
+
+## Passo 3 — Deploy das funções
+```bash
+supabase functions deploy buscar-grupo
+supabase functions deploy confirmar-presenca
+supabase functions deploy registrar-pendente
+supabase functions deploy admin
+```
+
+## Passo 4 — Testar
+1. No site, busque um grupo, preencha nome e sobrenome de todos (marque alguém como "não vai") e confirme.
+2. Busque o mesmo grupo de novo: os nomes aparecem travados, só com "vai/não vai".
+3. Clique em "Não encontrou seu convite?" e envie um pedido.
+4. Abra `admin.html`, entre com a `ADMIN_SENHA`, ligue o pedido a um grupo e clique em "Exportar planilha (CSV)".

@@ -1,6 +1,7 @@
 // supabase/functions/buscar-grupo/index.ts
-// Recebe { termo: string } e devolve grupos cujo "responsavel" combina.
-// Não expõe quantidade_maxima em texto livre, só o necessário pro autocomplete.
+// Recebe { termo: string } e devolve grupos cujo "responsavel" combina (autocomplete).
+// Recebe { grupo_id } e devolve as pessoas já cadastradas no grupo (para o RSVP
+// mostrar os nomes travados e só deixar marcar "vai"/"não vai").
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -15,18 +16,30 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { termo } = await req.json();
+    const { termo, grupo_id } = await req.json();
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    if (grupo_id) {
+      const { data: pessoas, error } = await supabase
+        .from("convidados_pessoas")
+        .select("id, nome, sobrenome, parentesco, vai")
+        .eq("grupo_id", grupo_id)
+        .order("criado_em", { ascending: true });
+      if (error) throw error;
+      return new Response(JSON.stringify({ pessoas: pessoas ?? [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!termo || typeof termo !== "string" || termo.trim().length < 2) {
       return new Response(JSON.stringify({ resultados: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
 
     // Busca "contém", sem case/acento (via unaccent no Postgres)
     const { data, error } = await supabase
@@ -51,6 +64,7 @@ Deno.serve(async (req: Request) => {
     const resultados = (data ?? []).map((g) => ({
       grupo_id: g.id,
       responsavel: g.responsavel,
+      quantidade_maxima: g.quantidade_maxima,
       ja_confirmado: jaConfirmados.has(g.id),
     }));
 
