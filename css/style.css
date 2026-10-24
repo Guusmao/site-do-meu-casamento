@@ -1767,6 +1767,19 @@ p {
         min-height: 100svh;
         height: auto;
         padding: 124px 18px 72px;
+        /* A imagem é horizontal, com as flores nos cantos e o centro vazio. Com "cover" o celular
+           mostrava só o centro (cinza). Aqui a mesma imagem entra duas vezes, com o dobro da largura
+           da tela: a metade esquerda (hortênsias e limões) em cima e a metade direita embaixo. */
+        background-color: #f7f3ec;
+        background-image: url('../assets/images/hero/hero-bg.png'), url('../assets/images/hero/hero-bg.png');
+        background-size: 200% auto, 200% auto;
+        background-position: left top, right bottom;
+        background-repeat: no-repeat, no-repeat;
+    }
+
+    /* Escurece só o meio, atrás do texto, e deixa as flores das bordas com a cor original */
+    .hero-overlay {
+        background: radial-gradient(ellipse 75% 45% at center, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.06) 100%);
     }
     
     .hero-title {
