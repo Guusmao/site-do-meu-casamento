@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderSugestoes(resultados) {
         if (resultados.length === 0) {
-            rsvpSugestoes.innerHTML = '<div class="rsvp-sugestao-vazia">Nenhum nome encontrado. Confira a grafia do convite.</div>';
+            rsvpSugestoes.innerHTML = '<div class="rsvp-sugestao-vazia">Nenhum nome encontrado. Confira a grafia do seu nome.</div>';
             return;
         }
         rsvpSugestoes.innerHTML = '';
