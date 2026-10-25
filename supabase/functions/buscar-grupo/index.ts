@@ -1,6 +1,7 @@
 // supabase/functions/buscar-grupo/index.ts
-// Recebe { termo: string } e devolve grupos cujo "responsavel" combina.
-// Não expõe quantidade_maxima em texto livre, só o necessário pro autocomplete.
+// Recebe { termo: string } e devolve os convidados cujo nome combina (coluna
+// "nomes" de convidados_lista), sem diferenciar maiúsculas/acentos.
+// Uma sugestão por pessoa, com o grupo (convite) ao qual ela pertence.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -28,12 +29,11 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Busca "contém", sem case/acento (via unaccent no Postgres)
-    const { data, error } = await supabase
-      .from("convidados_lista")
-      .select("id, responsavel, quantidade_maxima")
-      .ilike("responsavel", `%${termo.trim()}%`)
-      .limit(8);
+    // Busca "contém", sem case/acento, só nos nomes dos integrantes
+    // (função buscar_convidado_por_nome no Postgres, usa unaccent)
+    const { data, error } = await supabase.rpc("buscar_convidado_por_nome", {
+      termo: termo.trim(),
+    });
 
     if (error) throw error;
 
@@ -50,7 +50,10 @@ Deno.serve(async (req: Request) => {
 
     const resultados = (data ?? []).map((g) => ({
       grupo_id: g.id,
-      responsavel: g.responsavel,
+      nome: g.nome,
+      responsavel: g.nome, // o site mostra este campo na lista de sugestões
+      integrantes: g.integrantes,
+      quantidade_maxima: g.quantidade_maxima,
       ja_confirmado: jaConfirmados.has(g.id),
     }));
 
