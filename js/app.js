@@ -387,7 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
         resultados.forEach((r) => {
             const item = document.createElement('div');
             item.className = 'rsvp-sugestao-item';
-            item.textContent = r.ja_confirmado ? `${r.responsavel} (já confirmado — clique para editar)` : r.responsavel;
+            const rotulo = r.nome_encontrado ? `${r.responsavel} (${r.nome_encontrado})` : r.responsavel;
+            item.textContent = r.ja_confirmado ? `${rotulo} (já confirmado — clique para editar)` : rotulo;
             item.addEventListener('click', () => selecionarGrupo(r));
             rsvpSugestoes.appendChild(item);
         });

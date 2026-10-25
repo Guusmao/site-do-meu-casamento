@@ -10,6 +10,7 @@ create table if not exists public.convidados_lista (
   quantidade_maxima int not null check (quantidade_maxima > 0),
   origem text not null check (origem in ('noiva','noivo','amigos')),
   observacoes text,
+  nomes text[] not null default '{}',  -- integrantes (adultos e crianças), usados na busca
   criado_em timestamptz not null default now()
 );
 
