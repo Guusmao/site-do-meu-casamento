@@ -37,15 +37,18 @@ Deno.serve(async (req: Request) => {
 
     if (error) throw error;
 
-    // Verifica se cada grupo já tem confirmação registrada
+    // Verifica se cada grupo já tem confirmação registrada e se tem WhatsApp
+    // cadastrado (o site só recebe o final do número, nunca ele inteiro)
     const ids = (data ?? []).map((g) => g.id);
     let jaConfirmados = new Set<string>();
+    const finalWhatsapp = new Map<string, string>();
     if (ids.length > 0) {
-      const { data: confs } = await supabase
-        .from("confirmacoes")
-        .select("grupo_id")
-        .in("grupo_id", ids);
+      const [{ data: confs }, { data: grupos }] = await Promise.all([
+        supabase.from("confirmacoes").select("grupo_id").in("grupo_id", ids),
+        supabase.from("convidados_lista").select("id, whatsapp").in("id", ids),
+      ]);
       jaConfirmados = new Set((confs ?? []).map((c) => c.grupo_id));
+      for (const g of grupos ?? []) if (g.whatsapp) finalWhatsapp.set(g.id, g.whatsapp.slice(-4));
     }
 
     const resultados = (data ?? []).map((g) => ({
@@ -55,6 +58,7 @@ Deno.serve(async (req: Request) => {
       integrantes: g.integrantes,
       quantidade_maxima: g.quantidade_maxima,
       ja_confirmado: jaConfirmados.has(g.id),
+      whatsapp_final: finalWhatsapp.get(g.id) ?? null,
     }));
 
     return new Response(JSON.stringify({ resultados }), {
