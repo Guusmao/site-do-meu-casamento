@@ -571,6 +571,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderMessages(data);
     };
 
+    // Marca/desmarca o campo com erro (a borda vermelha e a mensagem vêm do CSS .form-group.error)
+    const toggleInputError = (input, isValid) => {
+        input.closest('.form-group').classList.toggle('error', !isValid);
+    };
+
     // Envia o recado ao submeter o formulário
     guestbookForm.addEventListener('submit', async (e) => {
         e.preventDefault();
