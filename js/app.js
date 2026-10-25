@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rsvpEmail = document.getElementById('rsvpEmail');
     const rsvpSubmitBtn = document.getElementById('rsvpSubmitBtn');
 
-    let grupoAtual = null; // { grupo_id, responsavel, quantidade_maxima }
+    let grupoAtual = null; // { grupo_id, nome, integrantes, quantidade_maxima }
 
     const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
 
@@ -387,17 +387,21 @@ document.addEventListener('DOMContentLoaded', () => {
         resultados.forEach((r) => {
             const item = document.createElement('div');
             item.className = 'rsvp-sugestao-item';
-            const rotulo = r.nome_encontrado ? `${r.responsavel} (${r.nome_encontrado})` : r.responsavel;
-            item.textContent = r.ja_confirmado ? `${rotulo} (já confirmado — clique para editar)` : rotulo;
+            item.textContent = r.ja_confirmado ? `${r.nome} (já confirmado — clique para editar)` : r.nome;
             item.addEventListener('click', () => selecionarGrupo(r));
             rsvpSugestoes.appendChild(item);
         });
     }
 
+    // ["Ana", "João", "Maria"] -> "Ana, João e Maria"
+    function juntarNomes(nomes) {
+        return nomes.length > 1 ? `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}` : nomes[0];
+    }
+
     function selecionarGrupo(grupo) {
         grupoAtual = grupo;
         rsvpGrupoId.value = grupo.grupo_id;
-        rsvpGrupoResponsavel.textContent = grupo.responsavel;
+        rsvpGrupoResponsavel.textContent = juntarNomes(grupo.integrantes?.length ? grupo.integrantes : [grupo.nome]);
         rsvpGrupoMax.textContent = grupo.quantidade_maxima ?? '';
 
         rsvpNomesContainer.innerHTML = '';
