@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
        6. CONFIRMAÇÃO DE PRESENÇA (RSVP) — LISTA FECHADA + QR CODE POR GRUPO
        Fluxo: busca pelo nome do responsável (Edge Function) -> seleciona grupo
        -> preenche nomes de quem vai -> confirma (Edge Function gera o QR e
-       dispara o email). Tudo validado no servidor, nunca no navegador.
+       dispara o WhatsApp). Tudo validado no servidor, nunca no navegador.
        ========================================================================== */
     const SUPABASE_FUNCTIONS_URL = `${supabaseUrl}/functions/v1`;
 
@@ -321,12 +321,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const rsvpNomesContainer = document.getElementById('rsvpNomesContainer');
     const rsvpAdicionarNome = document.getElementById('rsvpAdicionarNome');
     const rsvpVoltarBtn = document.getElementById('rsvpVoltarBtn');
-    const rsvpEmail = document.getElementById('rsvpEmail');
+    const rsvpWhatsapp = document.getElementById('rsvpWhatsapp');
+    const rsvpWhatsappHint = document.getElementById('rsvpWhatsappHint');
     const rsvpSubmitBtn = document.getElementById('rsvpSubmitBtn');
 
     let grupoAtual = null; // { grupo_id, nome, integrantes, quantidade_maxima }
 
-    const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).toLowerCase());
+    // Aceita (11) 98765-4321, 11987654321, +55 11 98765-4321 ou número de fora com "+"
+    const validateWhatsapp = (tel) => {
+        const digitos = tel.replace(/\D/g, '');
+        return tel.trim().startsWith('+') ? digitos.length >= 11 && digitos.length <= 15 : [10, 11, 12, 13].includes(digitos.length);
+    };
 
     // Cria uma linha de "nome + vai/não vai"
     function criarLinhaNome(valor = '') {
@@ -336,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="form-group">
                 <input type="text" class="rsvp-nome-input" placeholder="Nome do convidado" value="${valor}">
             </div>
-            <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+            <div class="form-group rsvp-vai-grupo">
                 <select class="rsvp-vai-select">
                     <option value="sim" selected>Vai comparecer</option>
                     <option value="nao">Não vai comparecer</option>
@@ -407,6 +412,13 @@ document.addEventListener('DOMContentLoaded', () => {
         rsvpNomesContainer.innerHTML = '';
         rsvpNomesContainer.appendChild(criarLinhaNome());
 
+        // Grupo com número cadastrado: o campo é opcional (só para trocar o número)
+        rsvpWhatsapp.value = '';
+        rsvpWhatsapp.closest('.form-group').classList.remove('error');
+        rsvpWhatsappHint.textContent = grupo.whatsapp_final
+            ? `Deixe em branco para receber no WhatsApp cadastrado, com final ${grupo.whatsapp_final}.`
+            : '';
+
         rsvpEtapaBusca.style.display = 'none';
         rsvpForm.style.display = 'block';
         rsvpSugestoes.innerHTML = '';
@@ -436,14 +448,19 @@ document.addEventListener('DOMContentLoaded', () => {
             vai: linha.querySelector('.rsvp-vai-select').value === 'sim'
         })).filter((n) => n.nome.length > 0);
 
-        const emailValido = validateEmail(rsvpEmail.value.trim());
-        rsvpEmail.closest('.form-group').classList.toggle('error', !emailValido);
+        const whatsapp = rsvpWhatsapp.value.trim();
+        const algumVai = nomes.some((n) => n.vai);
+        // Sem número cadastrado, o WhatsApp é obrigatório (exceto se ninguém vai)
+        const whatsappValido = whatsapp
+            ? validateWhatsapp(whatsapp)
+            : Boolean(grupoAtual?.whatsapp_final) || !algumVai;
+        rsvpWhatsapp.closest('.form-group').classList.toggle('error', !whatsappValido);
 
         if (nomes.length === 0) {
             alert('Adicione ao menos um nome.');
             return;
         }
-        if (!emailValido) return;
+        if (!whatsappValido) return;
 
         rsvpSubmitBtn.disabled = true;
         rsvpSubmitBtn.textContent = 'Enviando...';
@@ -458,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     grupo_id: rsvpGrupoId.value,
-                    email: rsvpEmail.value.trim(),
+                    whatsapp: whatsapp || undefined,
                     nomes
                 })
             });
@@ -477,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const vao = data.nomes_confirmados || [];
             rsvpSuccessMessage.innerHTML = vao.length > 0
-                ? `Confirmado! Enviamos o ingresso digital com QR Code para <strong>${rsvpEmail.value.trim()}</strong>.<br><br>Convidados confirmados: <em>${vao.join(', ')}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`
+                ? `Confirmado! Estamos enviando seu convite com o QR Code para o WhatsApp com final <strong>${data.whatsapp_final}</strong>.<br><br>Convidados confirmados: <em>${vao.join(', ')}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`
                 : `Obrigado por nos avisar! Sentiremos a falta de vocês no nosso grande dia.`;
         } catch (err) {
             console.error('Erro ao confirmar presença:', err);

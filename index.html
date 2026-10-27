@@ -343,9 +343,10 @@
                             </button>
 
                             <div class="form-group">
-                                <label for="rsvpEmail">Seu e-mail (para receber o ingresso digital)</label>
-                                <input type="email" id="rsvpEmail" name="email" placeholder="seuemail@exemplo.com" required>
-                                <span class="form-error" id="rsvpEmailError">Digite um e-mail válido.</span>
+                                <label for="rsvpWhatsapp">Seu WhatsApp (para receber o convite com o QR Code)</label>
+                                <input type="tel" id="rsvpWhatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="(11) 98765-4321">
+                                <span class="form-hint" id="rsvpWhatsappHint"></span>
+                                <span class="form-error" id="rsvpWhatsappError">Digite seu WhatsApp com DDD.</span>
                             </div>
 
                             <button type="submit" class="btn-primary btn-submit-rsvp" id="rsvpSubmitBtn">

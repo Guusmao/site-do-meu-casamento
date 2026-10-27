@@ -1,10 +1,16 @@
 // supabase/functions/confirmar-presenca/index.ts
-// Recebe { grupo_id, email, nomes: [{nome, vai}] }
+// Recebe { grupo_id, nomes: [{nome, vai}], whatsapp? }
 // Valida contra a lista fechada, grava a confirmação, gera o token
-// assinado do QR Code e chama a função enviar-ingresso.
+// assinado do QR Code e chama a função enviar-ingresso (WhatsApp).
+// O ingresso vai para o número digitado ou, se vier vazio, para o
+// número do grupo cadastrado na lista de convidados.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assinarToken } from "../_shared/qrToken.ts";
+import { normalizarTelefone } from "../_shared/whatsapp.ts";
+
+// Disponível no runtime das Edge Functions: mantém a tarefa viva depois da resposta
+declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,9 +21,9 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { grupo_id, email, nomes } = await req.json();
+    const { grupo_id, nomes, whatsapp: whatsappDigitado } = await req.json();
 
-    if (!grupo_id || !email || !Array.isArray(nomes) || nomes.length === 0) {
+    if (!grupo_id || !Array.isArray(nomes) || nomes.length === 0) {
       return new Response(JSON.stringify({ error: "Dados incompletos." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -32,7 +38,7 @@ Deno.serve(async (req: Request) => {
     // 1) Confere se o grupo existe e pega a quantidade máxima permitida
     const { data: grupo, error: erroGrupo } = await supabase
       .from("convidados_lista")
-      .select("id, responsavel, quantidade_maxima")
+      .select("id, responsavel, quantidade_maxima, whatsapp")
       .eq("id", grupo_id)
       .single();
 
@@ -52,13 +58,31 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 3) Cria/atualiza a confirmação (upsert por grupo_id, só 1 confirmação por grupo)
+    // 3) Para onde vai o ingresso: número digitado ou o do grupo na lista
+    let whatsapp = grupo.whatsapp as string | null;
+    if (whatsappDigitado) {
+      whatsapp = normalizarTelefone(whatsappDigitado);
+      if (!whatsapp) {
+        return new Response(JSON.stringify({ error: "WhatsApp inválido. Digite com DDD, ex: (11) 98765-4321." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+    if (!whatsapp && quantosVao > 0) {
+      return new Response(JSON.stringify({ error: "Digite seu WhatsApp para receber o convite." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // 4) Cria/atualiza a confirmação (upsert por grupo_id, só 1 confirmação por grupo)
     const { data: confirmacao, error: erroUpsert } = await supabase
       .from("confirmacoes")
       .upsert(
         {
           grupo_id,
-          email,
+          whatsapp,
           nomes_confirmados: nomes,
           atualizado_em: new Date().toISOString(),
         },
@@ -69,7 +93,7 @@ Deno.serve(async (req: Request) => {
 
     if (erroUpsert) throw erroUpsert;
 
-    // 4) Gera o token assinado do QR (só entra quem vier com vai:true)
+    // 5) Gera o token assinado do QR (só entra quem vier com vai:true)
     const qrSecret = Deno.env.get("QR_SECRET")!;
     const nomesVao = nomes.filter((n: any) => n.vai).map((n: any) => n.nome);
 
@@ -88,9 +112,10 @@ Deno.serve(async (req: Request) => {
       .update({ qr_token: token })
       .eq("id", confirmacao.id);
 
-    // 5) Dispara o envio do email com o ingresso (não bloqueia a resposta em caso de falha)
+    // 6) Dispara o envio do ingresso pelo WhatsApp em segundo plano
+    // (a resposta ao site não espera, e uma falha no envio não desfaz a confirmação)
     const enviarUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/enviar-ingresso`;
-    fetch(enviarUrl, {
+    const envio = fetch(enviarUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -98,9 +123,15 @@ Deno.serve(async (req: Request) => {
       },
       body: JSON.stringify({ confirmacao_id: confirmacao.id }),
     }).catch((e) => console.error("Falha ao chamar enviar-ingresso:", e));
+    EdgeRuntime.waitUntil(envio);
 
     return new Response(
-      JSON.stringify({ ok: true, responsavel: grupo.responsavel, nomes_confirmados: nomesVao }),
+      JSON.stringify({
+        ok: true,
+        responsavel: grupo.responsavel,
+        nomes_confirmados: nomesVao,
+        whatsapp_final: whatsapp ? whatsapp.slice(-4) : null,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
