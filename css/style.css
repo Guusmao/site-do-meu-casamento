@@ -1378,6 +1378,11 @@ p {
     font-size: 1.05rem;
 }
 
+/* "Voltar" logo abaixo do "Confirmar Presença", com respiro entre os dois */
+#rsvpVoltarBtn {
+    margin-top: 16px;
+}
+
 #guestsGroup {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
