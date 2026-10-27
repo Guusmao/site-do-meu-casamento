@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="form-group">
                 <input type="text" class="rsvp-nome-input" placeholder="Nome do convidado" value="${valor}">
             </div>
-            <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+            <div class="form-group rsvp-vai-grupo">
                 <select class="rsvp-vai-select">
                     <option value="sim" selected>Vai comparecer</option>
                     <option value="nao">Não vai comparecer</option>
