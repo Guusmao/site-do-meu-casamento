@@ -1380,7 +1380,9 @@ p {
 
 /* "Voltar" logo abaixo do "Confirmar Presença", com respiro entre os dois */
 #rsvpVoltarBtn {
-    margin-top: 16px;
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px;
 }
 
 #guestsGroup {
