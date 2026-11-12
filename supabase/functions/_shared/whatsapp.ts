@@ -1,5 +1,16 @@
 // supabase/functions/_shared/whatsapp.ts
-// Envio de mensagens pela WhatsApp Cloud API oficial da Meta.
+// Envio de mensagens pelo WhatsApp. Dois provedores:
+//  - Evolution API (não oficial, número conectado por QR Code, texto livre)
+//  - WhatsApp Cloud API oficial da Meta (só templates aprovados)
+// A Evolution é usada quando os secrets EVOLUTION_* estão configurados;
+// para forçar a Meta, defina WHATSAPP_PROVEDOR=meta.
+//
+// Secrets da Evolution (configurados no Supabase, nunca no código):
+//   EVOLUTION_URL        endereço do servidor, ex: https://evolution.seudominio.com
+//   EVOLUTION_API_KEY    chave da API (global ou da instância)
+//   EVOLUTION_INSTANCE   nome da instância conectada, ex: casamento
+//
+// Meta (Cloud API):
 // Fora da janela de 24h de conversa, a Meta só aceita mensagens de template
 // aprovado, então tudo que o robô manda (ingresso e lembretes) é template.
 //
@@ -60,4 +71,44 @@ export async function enviarTemplate(
 // nem mais de 4 espaços seguidos.
 export function textoParametro(s: string) {
   return { type: "text", text: s.replace(/[\n\t]+/g, " ").replace(/ {4,}/g, "   ").trim() };
+}
+
+export function usarEvolution(): boolean {
+  const provedor = Deno.env.get("WHATSAPP_PROVEDOR");
+  if (provedor === "meta") return false;
+  return Boolean(Deno.env.get("EVOLUTION_URL") && Deno.env.get("EVOLUTION_API_KEY"));
+}
+
+// Manda uma imagem com legenda pela Evolution API (v2). Devolve o id da mensagem.
+// O "delay" faz o WhatsApp mostrar "digitando..." antes, como uma pessoa faria.
+export async function enviarImagemEvolution(
+  para: string,
+  imagemUrl: string,
+  legenda: string
+): Promise<string | undefined> {
+  const base = Deno.env.get("EVOLUTION_URL")?.replace(/\/+$/, "");
+  const apiKey = Deno.env.get("EVOLUTION_API_KEY");
+  const instancia = Deno.env.get("EVOLUTION_INSTANCE") ?? "casamento";
+  if (!base || !apiKey) throw new Error("EVOLUTION_URL/EVOLUTION_API_KEY não configurados");
+
+  const resp = await fetch(`${base}/message/sendMedia/${encodeURIComponent(instancia)}`, {
+    method: "POST",
+    headers: { apikey: apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      number: para,
+      mediatype: "image",
+      mimetype: "image/png",
+      media: imagemUrl,
+      fileName: "ingresso.png",
+      caption: legenda,
+      delay: 1500 + Math.floor(Math.random() * 2500),
+    }),
+  });
+
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    const detalhe = data?.response?.message ?? data?.message ?? data?.error ?? resp.status;
+    throw new Error(`Evolution recusou o envio: ${typeof detalhe === "string" ? detalhe : JSON.stringify(detalhe)}`);
+  }
+  return data?.key?.id;
 }
