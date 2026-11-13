@@ -161,3 +161,24 @@ export function chaveTelefone(numero: string) {
   if (d.startsWith("55") && (d.length === 12 || d.length === 13)) return d.slice(0, 4) + d.slice(-8);
   return d;
 }
+
+// Estado da conexão da instância com o WhatsApp ("open" = conectada)
+export async function estadoEvolution(): Promise<string> {
+  const { base, apiKey, instancia } = configEvolution();
+  const resp = await fetch(`${base}/instance/connectionState/${encodeURIComponent(instancia)}`, { headers: { apikey: apiKey } });
+  const data = await resp.json().catch(() => ({}));
+  return data?.instance?.state ?? data?.state ?? `http ${resp.status}`;
+}
+
+// Pede um código de pareamento (8 letras) para conectar o número sem ler QR:
+// no celular, Aparelhos conectados > Conectar aparelho > Conectar com número.
+export async function codigoPareamentoEvolution(numero: string) {
+  const { base, apiKey, instancia } = configEvolution();
+  const resp = await fetch(
+    `${base}/instance/connect/${encodeURIComponent(instancia)}?number=${encodeURIComponent(numero.replace(/\D/g, ""))}`,
+    { headers: { apikey: apiKey } }
+  );
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(`Evolution recusou: ${JSON.stringify(data)}`);
+  return data?.pairingCode ?? null;
+}

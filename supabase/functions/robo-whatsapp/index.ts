@@ -16,7 +16,7 @@
 //  - grupos, status e mensagens enviadas pelo próprio robô são ignorados
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { chaveTelefone, configurarWebhookEvolution, enviarTextoEvolution } from "../_shared/whatsapp.ts";
+import { chaveTelefone, configurarWebhookEvolution, codigoPareamentoEvolution, enviarTextoEvolution, estadoEvolution } from "../_shared/whatsapp.ts";
 import { Confirmacao, enviarIngresso, juntarNomes, nomesQueVao, urlSite } from "../_shared/ingresso.ts";
 
 Deno.serve(async (req: Request) => {
@@ -30,6 +30,28 @@ Deno.serve(async (req: Request) => {
       return Response.json({ ok: true });
     } catch (e) {
       return Response.json({ ok: false, error: String(e) }, { status: 502 });
+    }
+  }
+
+  // Só diz se o número está conectado (sem dados de ninguém)
+  if (url.searchParams.get("status")) {
+    try {
+      return Response.json({ estado: await estadoEvolution() });
+    } catch (e) {
+      return Response.json({ estado: "erro", error: String(e) }, { status: 502 });
+    }
+  }
+
+  // Reconectar sem QR: devolve o código de pareamento (só quando está desconectado;
+  // o código só serve no celular do próprio número, então não expõe nada)
+  const numero = url.searchParams.get("conectar");
+  if (numero) {
+    try {
+      const estado = await estadoEvolution();
+      if (estado === "open") return Response.json({ estado });
+      return Response.json({ estado, codigo: await codigoPareamentoEvolution(numero) });
+    } catch (e) {
+      return Response.json({ error: String(e) }, { status: 502 });
     }
   }
 

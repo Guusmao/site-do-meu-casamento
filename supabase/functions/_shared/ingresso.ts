@@ -43,9 +43,16 @@ export async function enviarIngresso(
   const destino = para ?? c.whatsapp!;
   let id = registroId;
   if (!id) {
+    // Fora os lembretes, tudo é registrado como "ingresso" (que pode se repetir);
+    // o motivo do envio (reenvio, teste...) fica em "template".
     const { data } = await supabase
       .from("mensagens_whatsapp")
-      .insert({ confirmacao_id: c.id, tipo, telefone: destino, template: `evolution:${tipo}` })
+      .insert({
+        confirmacao_id: c.id,
+        tipo: tipo.startsWith("lembrete_") ? tipo : "ingresso",
+        telefone: destino,
+        template: `evolution:${tipo}`,
+      })
       .select("id")
       .single();
     id = data?.id;
