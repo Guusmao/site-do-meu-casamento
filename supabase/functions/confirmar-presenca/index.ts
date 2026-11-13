@@ -38,7 +38,7 @@ Deno.serve(async (req: Request) => {
     // 1) Confere se o grupo existe e pega a quantidade máxima permitida
     const { data: grupo, error: erroGrupo } = await supabase
       .from("convidados_lista")
-      .select("id, responsavel, quantidade_maxima, whatsapp")
+      .select("id, responsavel, quantidade_maxima, whatsapp, nomes")
       .eq("id", grupo_id)
       .single();
 
@@ -56,6 +56,26 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: `Este grupo tem no máximo ${grupo.quantidade_maxima} convidados.` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // 2b) Só valem os nomes da lista de convidados deste grupo, cada um uma vez.
+    // O nome gravado é sempre o da lista (não o que veio do navegador).
+    const nomesLista: string[] = Array.isArray(grupo.nomes) ? grupo.nomes : [];
+    if (nomesLista.length > 0) {
+      const porChave = new Map(nomesLista.map((n) => [chaveNome(n), n]));
+      const vistos = new Set<string>();
+      for (const n of nomes) {
+        const chave = chaveNome(String(n?.nome ?? ""));
+        if (!porChave.has(chave) || vistos.has(chave)) {
+          return new Response(
+            JSON.stringify({ error: "Só é possível confirmar os nomes que estão no convite." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        vistos.add(chave);
+        n.nome = porChave.get(chave);
+        n.vai = n.vai === true;
+      }
     }
 
     // 3) Para onde vai o ingresso: número digitado ou o do grupo na lista
@@ -141,3 +161,8 @@ Deno.serve(async (req: Request) => {
     });
   }
 });
+
+// Compara nomes sem diferenciar maiúsculas, acentos e espaços extras
+function chaveNome(nome: string) {
+  return nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+}

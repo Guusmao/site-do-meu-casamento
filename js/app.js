@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ==========================================================================
        6. CONFIRMAÇÃO DE PRESENÇA (RSVP) — LISTA FECHADA + QR CODE POR GRUPO
        Fluxo: busca pelo nome do responsável (Edge Function) -> seleciona grupo
-       -> preenche nomes de quem vai -> confirma (Edge Function gera o QR e
+       -> marca quem vai entre os nomes da lista -> confirma (Edge Function gera o QR e
        dispara o WhatsApp). Tudo validado no servidor, nunca no navegador.
        ========================================================================== */
     const SUPABASE_FUNCTIONS_URL = `${supabaseUrl}/functions/v1`;
@@ -319,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const rsvpGrupoResponsavel = document.getElementById('rsvpGrupoResponsavel');
     const rsvpGrupoMax = document.getElementById('rsvpGrupoMax');
     const rsvpNomesContainer = document.getElementById('rsvpNomesContainer');
-    const rsvpAdicionarNome = document.getElementById('rsvpAdicionarNome');
     const rsvpVoltarBtn = document.getElementById('rsvpVoltarBtn');
     const rsvpWhatsapp = document.getElementById('rsvpWhatsapp');
     const rsvpWhatsappHint = document.getElementById('rsvpWhatsappHint');
@@ -333,24 +332,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return tel.trim().startsWith('+') ? digitos.length >= 11 && digitos.length <= 15 : [10, 11, 12, 13].includes(digitos.length);
     };
 
-    // Cria uma linha de "nome + vai/não vai"
-    function criarLinhaNome(valor = '') {
+    // Cria uma linha "nome + vai/não vai". O nome vem da lista de convidados
+    // e não pode ser editado: o convidado só escolhe se vai ou não.
+    function criarLinhaNome(nome) {
         const linha = document.createElement('div');
         linha.className = 'form-row-2 rsvp-linha-nome';
         linha.innerHTML = `
             <div class="form-group">
-                <input type="text" class="rsvp-nome-input" placeholder="Nome do convidado" value="${valor}">
+                <span class="rsvp-nome-fixo"></span>
             </div>
             <div class="form-group rsvp-vai-grupo">
-                <select class="rsvp-vai-select">
+                <select class="rsvp-vai-select" aria-label="Presença">
                     <option value="sim" selected>Vai comparecer</option>
                     <option value="nao">Não vai comparecer</option>
                 </select>
-                <button type="button" class="rsvp-remover-nome" title="Remover" aria-label="Remover">✕</button>
             </div>`;
-        linha.querySelector('.rsvp-remover-nome').addEventListener('click', () => {
-            if (rsvpNomesContainer.children.length > 1) linha.remove();
-        });
+        linha.dataset.nome = nome;
+        linha.querySelector('.rsvp-nome-fixo').textContent = nome;
         return linha;
     }
 
@@ -409,8 +407,10 @@ document.addEventListener('DOMContentLoaded', () => {
         rsvpGrupoResponsavel.textContent = juntarNomes(grupo.integrantes?.length ? grupo.integrantes : [grupo.nome]);
         rsvpGrupoMax.textContent = grupo.quantidade_maxima ?? '';
 
+        // Uma linha por pessoa do convite, com o nome travado
         rsvpNomesContainer.innerHTML = '';
-        rsvpNomesContainer.appendChild(criarLinhaNome());
+        const integrantes = grupo.integrantes?.length ? grupo.integrantes : [grupo.nome];
+        integrantes.forEach((nome) => rsvpNomesContainer.appendChild(criarLinhaNome(nome)));
 
         // Grupo com número cadastrado: o campo é opcional (só para trocar o número)
         rsvpWhatsapp.value = '';
@@ -424,15 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
         rsvpSugestoes.innerHTML = '';
     }
 
-    rsvpAdicionarNome.addEventListener('click', () => {
-        const max = grupoAtual?.quantidade_maxima ?? 1;
-        if (rsvpNomesContainer.children.length >= max) {
-            alert(`Este convite permite no máximo ${max} pessoa(s).`);
-            return;
-        }
-        rsvpNomesContainer.appendChild(criarLinhaNome());
-    });
-
     rsvpVoltarBtn.addEventListener('click', () => {
         rsvpForm.style.display = 'none';
         rsvpEtapaBusca.style.display = 'block';
@@ -444,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const nomes = Array.from(rsvpNomesContainer.querySelectorAll('.rsvp-linha-nome')).map((linha) => ({
-            nome: linha.querySelector('.rsvp-nome-input').value.trim(),
+            nome: linha.dataset.nome,
             vai: linha.querySelector('.rsvp-vai-select').value === 'sim'
         })).filter((n) => n.nome.length > 0);
 
