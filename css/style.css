@@ -2109,11 +2109,10 @@ p {
     min-width: 0;
 }
 
-.rsvp-remover-nome {
-    background: none;
-    border: none;
-    color: var(--color-danger);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 4px 8px;
+/* Nome do convidado vindo da lista (não editável) */
+.rsvp-nome-fixo {
+    display: block;
+    padding: 12px 0;
+    font-weight: 500;
+    color: var(--color-text, #4a4a4a);
 }

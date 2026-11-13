@@ -1,11 +1,12 @@
 // supabase/functions/enviar-ingresso/index.ts
 // Recebe { confirmacao_id } e manda o ingresso pelo WhatsApp do grupo:
-// template aprovado na Meta com o QR Code como imagem de cabeçalho
-// (gerado via QuickChart, sem precisar de libs pesadas) e os nomes no texto.
+// o QR Code como imagem (gerado via QuickChart, sem libs pesadas) e os nomes
+// no texto. Pela Evolution vai como imagem com legenda livre; pela Meta, como
+// template aprovado com o QR no cabeçalho.
 // Cada envio fica registrado em mensagens_whatsapp.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { enviarTemplate, textoParametro } from "../_shared/whatsapp.ts";
+import { enviarImagemEvolution, enviarTemplate, textoParametro, usarEvolution } from "../_shared/whatsapp.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,7 +58,10 @@ Deno.serve(async (req: Request) => {
       confirmacao.qr_token
     )}&size=600&margin=3&format=png&dark=2d2a26&light=fdfaf5`;
 
-    const template = Deno.env.get("WHATSAPP_TEMPLATE_INGRESSO") ?? "ingresso_casamento";
+    const evolution = usarEvolution();
+    const template = evolution
+      ? "evolution:ingresso"
+      : Deno.env.get("WHATSAPP_TEMPLATE_INGRESSO") ?? "ingresso_casamento";
     const { data: msg } = await supabase
       .from("mensagens_whatsapp")
       .insert({ confirmacao_id, tipo: "ingresso", telefone: confirmacao.whatsapp, template })
@@ -65,14 +69,17 @@ Deno.serve(async (req: Request) => {
       .single();
 
     try {
-      // Template: cabeçalho = imagem do QR; {{1}} = primeiro nome; {{2}} = quem vai
-      const waId = await enviarTemplate(confirmacao.whatsapp, template, [
-        { type: "header", parameters: [{ type: "image", image: { link: qrUrl } }] },
-        {
-          type: "body",
-          parameters: [textoParametro(nomesVao[0].split(" ")[0]), textoParametro(juntarNomes(nomesVao))],
-        },
-      ]);
+      const primeiroNome = nomesVao[0].split(" ")[0];
+      const waId = evolution
+        ? await enviarImagemEvolution(confirmacao.whatsapp, qrUrl, legendaIngresso(primeiroNome, nomesVao))
+        : // Template: cabeçalho = imagem do QR; {{1}} = primeiro nome; {{2}} = quem vai
+          await enviarTemplate(confirmacao.whatsapp, template, [
+            { type: "header", parameters: [{ type: "image", image: { link: qrUrl } }] },
+            {
+              type: "body",
+              parameters: [textoParametro(primeiroNome), textoParametro(juntarNomes(nomesVao))],
+            },
+          ]);
 
       await supabase
         .from("mensagens_whatsapp")
@@ -107,4 +114,16 @@ function json(body: unknown, status = 200) {
 // ["Ana", "João", "Maria"] -> "Ana, João e Maria"
 function juntarNomes(nomes: string[]) {
   return nomes.length > 1 ? `${nomes.slice(0, -1).join(", ")} e ${nomes[nomes.length - 1]}` : nomes[0];
+}
+
+// Texto que acompanha o QR Code quando o envio é pela Evolution
+function legendaIngresso(primeiroNome: string, nomesVao: string[]) {
+  const quem = nomesVao.length > 1 ? `Presenças confirmadas: ${juntarNomes(nomesVao)}.` : "Sua presença está confirmada!";
+  return [
+    `Oi, ${primeiroNome}! 💍`,
+    "",
+    `Que alegria ter vocês no casamento da Sarah e do Felipe, no dia 08/02/2027. ${quem}`,
+    "",
+    "Este QR Code é o ingresso de vocês: é só mostrar na entrada no dia. Guarde esta mensagem! 🥂",
+  ].join("\n");
 }
