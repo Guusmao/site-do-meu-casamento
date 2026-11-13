@@ -86,7 +86,8 @@ export async function enviarImagemEvolution(
   imagemUrl: string,
   legenda: string
 ): Promise<string | undefined> {
-  const base = Deno.env.get("EVOLUTION_URL")?.replace(/\/+$/, "");
+  // Aceita o endereço colado com "/manager" ou barra no final
+  const base = Deno.env.get("EVOLUTION_URL")?.trim().replace(/\/+$/, "").replace(/\/manager$/, "");
   const apiKey = Deno.env.get("EVOLUTION_API_KEY");
   const instancia = Deno.env.get("EVOLUTION_INSTANCE") ?? "casamento";
   if (!base || !apiKey) throw new Error("EVOLUTION_URL/EVOLUTION_API_KEY não configurados");
