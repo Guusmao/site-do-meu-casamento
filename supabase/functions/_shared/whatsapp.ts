@@ -113,3 +113,51 @@ export async function enviarImagemEvolution(
   }
   return data?.key?.id;
 }
+
+function configEvolution() {
+  const base = Deno.env.get("EVOLUTION_URL")?.trim().replace(/\/+$/, "").replace(/\/manager$/, "");
+  const apiKey = Deno.env.get("EVOLUTION_API_KEY");
+  const instancia = Deno.env.get("EVOLUTION_INSTANCE") ?? "casamento";
+  if (!base || !apiKey) throw new Error("EVOLUTION_URL/EVOLUTION_API_KEY não configurados");
+  return { base, apiKey, instancia };
+}
+
+// Manda uma mensagem de texto pela Evolution API (v2). "para" pode ser o
+// número só com dígitos ou o JID que veio na mensagem recebida.
+export async function enviarTextoEvolution(para: string, texto: string): Promise<string | undefined> {
+  const { base, apiKey, instancia } = configEvolution();
+  const resp = await fetch(`${base}/message/sendText/${encodeURIComponent(instancia)}`, {
+    method: "POST",
+    headers: { apikey: apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({ number: para, text: texto, delay: 1200 + Math.floor(Math.random() * 1800) }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) {
+    const detalhe = data?.response?.message ?? data?.message ?? data?.error ?? resp.status;
+    throw new Error(`Evolution recusou o texto: ${typeof detalhe === "string" ? detalhe : JSON.stringify(detalhe)}`);
+  }
+  return data?.key?.id;
+}
+
+// Aponta o webhook da instância para a URL dada, só com mensagens recebidas.
+export async function configurarWebhookEvolution(url: string) {
+  const { base, apiKey, instancia } = configEvolution();
+  const resp = await fetch(`${base}/webhook/set/${encodeURIComponent(instancia)}`, {
+    method: "POST",
+    headers: { apikey: apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      webhook: { enabled: true, url, webhookByEvents: false, webhookBase64: false, events: ["MESSAGES_UPSERT"] },
+    }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok) throw new Error(`Evolution recusou o webhook: ${JSON.stringify(data)}`);
+  return data;
+}
+
+// Chave para comparar telefones: no Brasil o WhatsApp às vezes guarda o
+// celular sem o 9 extra, então compara DDI+DDD+últimos 8 dígitos.
+export function chaveTelefone(numero: string) {
+  const d = numero.replace(/\D/g, "");
+  if (d.startsWith("55") && (d.length === 12 || d.length === 13)) return d.slice(0, 4) + d.slice(-8);
+  return d;
+}
