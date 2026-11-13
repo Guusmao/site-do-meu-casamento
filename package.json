@@ -1,0 +1,9 @@
+{
+  "name": "site-do-meu-casamento",
+  "private": true,
+  "description": "Site do casamento Sarah & Felipe (estático) + funções da Vercel em /api",
+  "dependencies": {
+    "@vercel/og": "0.6.8",
+    "qrcode-generator": "1.4.4"
+  }
+}
