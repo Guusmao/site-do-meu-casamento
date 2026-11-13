@@ -5,21 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Check-in — Casamento Sarah & Felipe</title>
 <meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/branding/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/branding/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 <style>
+    /* Mesmas cores do site: azul, amarelo e fundo azul-claro */
     :root {
-        --bg: #1e1c19;
-        --card: #2a2621;
-        --accent: #f2c14e;
-        --text: #f3efe9;
-        --muted: #b7ada0;
-        --danger: #d84a4a;
-        --success: #4caf7d;
+        --bg: #E8EFF7;
+        --card: rgba(255, 255, 255, 0.82);
+        --card-borda: rgba(143, 168, 200, 0.35);
+        --primaria: #8FA8C8;
+        --primaria-escura: #6F8DB5;
+        --marinho: #123F7A;
+        --accent: #F2C14E;
+        --text: #2D2825;
+        --muted: #736B67;
+        --campo: #F7F9FC;
+        --danger: #D32F2F;
+        --success: #2E7D32;
     }
     * { box-sizing: border-box; }
     body {
         margin: 0;
         font-family: 'Inter', -apple-system, sans-serif;
-        background: var(--bg);
+        background:
+            radial-gradient(700px 320px at 50% -10%, rgba(255, 255, 255, 0.85), transparent 65%),
+            var(--bg);
         color: var(--text);
         min-height: 100vh;
         display: flex;
@@ -27,12 +40,22 @@
         align-items: center;
         padding: 24px 16px;
     }
-    h1 { font-size: 1.3rem; margin-bottom: 4px; text-align:center; }
-    p.sub { color: var(--muted); font-size: 0.85rem; margin-top: 0; text-align:center; }
+    .monograma { width: 92px; height: auto; display: block; margin: 4px auto 8px; }
+    h1 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.6rem;
+        color: var(--primaria-escura);
+        margin: 0 0 4px;
+        text-align: center;
+    }
+    p.sub { color: var(--muted); font-size: 0.85rem; margin-top: 0; text-align: center; }
 
     .card {
         background: var(--card);
-        border-radius: 16px;
+        border: 1px solid var(--card-borda);
+        border-radius: 20px;
+        box-shadow: 0 12px 32px rgba(86, 106, 140, 0.12);
         padding: 24px;
         max-width: 420px;
         width: 100%;
@@ -41,38 +64,50 @@
     input, button {
         width: 100%;
         padding: 14px;
-        border-radius: 10px;
-        border: 1px solid #46403a;
-        background: #1e1c19;
+        border-radius: 12px;
+        border: 1px solid var(--card-borda);
+        background: var(--campo);
         color: var(--text);
+        font-family: inherit;
         font-size: 1rem;
         margin-bottom: 12px;
     }
+    input:focus { outline: 2px solid var(--primaria); outline-offset: 1px; }
     button {
-        background: var(--accent);
-        color: #1e1c19;
+        background: var(--primaria);
+        color: #fff;
         font-weight: 600;
         border: none;
         cursor: pointer;
+        box-shadow: 0 6px 16px rgba(143, 168, 200, 0.35);
     }
-    button:active { opacity: 0.85; }
+    button:active { background: var(--primaria-escura); }
+    button:disabled { opacity: 0.6; }
 
     #reader {
         width: 100%;
-        border-radius: 12px;
+        border-radius: 14px;
         overflow: hidden;
+        border: 2px solid var(--card-borda);
     }
 
-    .resultado {
-        margin-top: 16px;
+    .resultado { margin-top: 16px; }
+    .resultado h2 {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-weight: 600;
+        font-size: 1.15rem;
+        color: var(--marinho);
+        margin-bottom: 10px;
     }
-    .resultado h2 { font-size: 1rem; margin-bottom: 10px; }
     .nome-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #1e1c19;
-        border-radius: 10px;
+        gap: 10px;
+        background: #fff;
+        border: 1px solid var(--card-borda);
+        border-left: 4px solid var(--accent);
+        border-radius: 12px;
         padding: 12px 14px;
         margin-bottom: 8px;
     }
@@ -81,34 +116,73 @@
         padding: 8px 14px;
         margin: 0;
         font-size: 0.85rem;
+        white-space: nowrap;
+        box-shadow: none;
     }
-    .nome-item.entrou { opacity: 0.5; }
+    .nome-item.entrou { opacity: 0.6; border-left-color: var(--success); }
     .tag-entrou {
         font-size: 0.75rem;
+        font-weight: 600;
         color: var(--success);
     }
     .msg-erro {
-        background: rgba(216,74,74,0.15);
-        color: #ff9d9d;
+        background: rgba(211, 47, 47, 0.08);
+        border: 1px solid rgba(211, 47, 47, 0.25);
+        color: var(--danger);
         padding: 12px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 0.9rem;
         margin-top: 12px;
     }
     .msg-ok {
-        background: rgba(76,175,125,0.15);
-        color: #8fe0b6;
+        background: rgba(46, 125, 50, 0.08);
+        border: 1px solid rgba(46, 125, 50, 0.25);
+        color: var(--success);
         padding: 12px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 0.9rem;
         margin-top: 12px;
     }
+    /* Aviso grande: verde = pode entrar; vermelho = inválido ou já usado */
+    .aviso {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+        color: #fff;
+        animation: aparecer 0.25s ease;
+    }
+    .aviso strong { display: block; font-size: 1.25rem; line-height: 1.2; }
+    .aviso span:not(.aviso-icone) { display: block; font-size: 0.95rem; opacity: 0.95; margin-top: 2px; }
+    .aviso-icone {
+        flex: none;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        display: grid;
+        place-items: center;
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+    .aviso-ok { background: var(--success); box-shadow: 0 8px 20px rgba(46, 125, 50, 0.28); }
+    .aviso-erro { background: var(--danger); box-shadow: 0 8px 20px rgba(211, 47, 47, 0.28); }
+    @keyframes aparecer { from { transform: scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    .btn-liberar-todos {
+        background: var(--marinho);
+        box-shadow: 0 6px 16px rgba(18, 63, 122, 0.25);
+    }
+    .verificando { color: var(--muted); text-align: center; }
     .hidden { display: none; }
 </style>
 </head>
 <body>
 
-<h1>Check-in — Sarah & Felipe</h1>
+<img class="monograma" src="assets/images/branding/selo-monograma.png" alt="Monograma S e F" width="300" height="325">
+<h1>Check-in — Sarah &amp; Felipe</h1>
 <p class="sub">Página exclusiva da equipe da entrada</p>
 
 <!-- Tela de senha -->
