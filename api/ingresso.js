@@ -1,6 +1,6 @@
 // api/ingresso.js
 // Gera a imagem do ingresso (PNG) que o robô manda no WhatsApp, com a
-// identidade do site: aquarela de hortênsias e limões, monograma S&F,
+// identidade do site: aquarela de hortênsias e limões, monograma S&F (moldura oval com gregas),
 // azul e amarelo, Playfair Display + Inter.
 //
 // Uso: /api/ingresso?t=<qr_token>
@@ -94,7 +94,7 @@ export default async function handler(req) {
 
     const nomes = lerNomes(token);
     const listaNomes = nomes.length ? nomes : ['Convidados'];
-    const altura = 1720 + Math.max(0, listaNomes.length - 2) * 52;
+    const altura = 1784 + Math.max(0, listaNomes.length - 2) * 52;
 
     const serif = { fontFamily: 'Playfair' };
     const sans = { fontFamily: 'Inter' };
@@ -108,8 +108,8 @@ export default async function handler(req) {
         img(`data:image/jpeg;base64,${paraBase64(rodape)}`, LARGURA, 420, { position: 'absolute', bottom: 0, left: 0 }),
 
         // Monograma e nomes do casal
-        h('div', { flexDirection: 'column', alignItems: 'center', marginTop: 70 }, [
-            img(`data:image/png;base64,${paraBase64(monograma)}`, 230, 206),
+        h('div', { flexDirection: 'column', alignItems: 'center', marginTop: 60 }, [
+            img(`data:image/png;base64,${paraBase64(monograma)}`, 250, 270),
             h('div', { ...sans, fontSize: 24, letterSpacing: 8, color: COR.suave, marginTop: 26, textTransform: 'uppercase' },
                 'Ingresso do casamento de'),
             h('div', { ...serif, fontSize: 92, color: COR.marinho, marginTop: 6, fontWeight: 600 }, 'Sarah & Felipe'),
