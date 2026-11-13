@@ -17,7 +17,6 @@ const btnNovaLeitura = document.getElementById('btnNovaLeitura');
 const areaResultado = document.getElementById('areaResultado');
 
 let senhaPortaria = '';
-let html5QrCode = null;
 
 btnEntrar.addEventListener('click', () => {
     if (!senhaInput.value.trim()) return;
@@ -28,22 +27,86 @@ btnEntrar.addEventListener('click', () => {
     iniciarLeitor();
 });
 
-function iniciarLeitor() {
+// Leitor de QR próprio: lê o quadro da câmera na resolução cheia.
+// O QR do ingresso é denso (leva os nomes do grupo), e a biblioteca anterior
+// reduzia a imagem ao tamanho da tela antes de ler, o que impedia a leitura
+// no celular. Usa o leitor nativo do aparelho (BarcodeDetector) quando existe
+// e o jsQR nos outros casos (iPhone, por exemplo).
+const leitor = {
+    stream: null,
+    video: null,
+    canvas: document.createElement('canvas'),
+    detector: null,
+    ativo: false,
+    ultimo: 0,
+};
+
+async function iniciarLeitor() {
     areaResultado.innerHTML = '';
-    html5QrCode = new Html5Qrcode('reader');
-    html5QrCode.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 260, height: 260 } },
-        onQrLido,
-        () => {} // erros de frame sem QR são ignorados
-    ).catch((err) => {
-        areaResultado.innerHTML = `<div class="msg-erro">Não foi possível acessar a câmera: ${err}</div>`;
-    });
+    const reader = document.getElementById('reader');
+    if (!leitor.video) {
+        leitor.video = document.createElement('video');
+        leitor.video.setAttribute('playsinline', '');
+        leitor.video.muted = true;
+        reader.appendChild(leitor.video);
+        const mira = document.createElement('div');
+        mira.className = 'mira';
+        reader.appendChild(mira);
+    }
+    try {
+        if ('BarcodeDetector' in window && !leitor.detector) {
+            const formatos = await BarcodeDetector.getSupportedFormats();
+            if (formatos.includes('qr_code')) leitor.detector = new BarcodeDetector({ formats: ['qr_code'] });
+        }
+    } catch { leitor.detector = null; }
+    try {
+        leitor.stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        });
+        leitor.video.srcObject = leitor.stream;
+        await leitor.video.play();
+        leitor.ativo = true;
+        requestAnimationFrame(lerQuadro);
+    } catch (err) {
+        areaResultado.innerHTML = mostrarAviso('erro', 'Câmera indisponível', 'Permita o acesso à câmera no navegador e recarregue a página.');
+    }
 }
 
-async function onQrLido(token) {
-    await html5QrCode.pause(true);
-    await consultarToken(token);
+async function lerQuadro(agora) {
+    if (!leitor.ativo) return;
+    const v = leitor.video;
+    // ~8 leituras por segundo bastam e poupam bateria
+    if (agora - leitor.ultimo > 120 && v.readyState >= 2 && v.videoWidth) {
+        leitor.ultimo = agora;
+        try {
+            let texto = null;
+            if (leitor.detector) {
+                const codigos = await leitor.detector.detect(v);
+                texto = codigos[0]?.rawValue ?? null;
+            } else if (window.jsQR) {
+                const c = leitor.canvas;
+                c.width = v.videoWidth;
+                c.height = v.videoHeight;
+                const ctx = c.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(v, 0, 0, c.width, c.height);
+                const img = ctx.getImageData(0, 0, c.width, c.height);
+                texto = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' })?.data ?? null;
+            }
+            if (texto && leitor.ativo) {
+                leitor.ativo = false;
+                await consultarToken(texto);
+                return;
+            }
+        } catch { /* quadro ruim: tenta o próximo */ }
+    }
+    requestAnimationFrame(lerQuadro);
+}
+
+function pararLeitor() {
+    leitor.ativo = false;
+    leitor.stream?.getTracks().forEach((t) => t.stop());
+    leitor.stream = null;
 }
 
 // Aviso grande no topo do resultado: verde (pode entrar) ou vermelho
@@ -82,7 +145,7 @@ async function voltarParaSenha(mensagem) {
     telaSenha.classList.remove('hidden');
     senhaErro.textContent = mensagem;
     senhaErro.classList.remove('hidden');
-    if (html5QrCode) { try { await html5QrCode.stop(); } catch {} }
+    pararLeitor();
 }
 
 // avisoExtra: aviso que substitui o automático (ex.: depois de liberar alguém)
@@ -177,8 +240,12 @@ function renderResultado(token, data, avisoExtra) {
 }
 
 btnNovaLeitura.addEventListener('click', async () => {
-    if (html5QrCode) {
-        try { await html5QrCode.resume(); } catch { iniciarLeitor(); }
-    }
     areaResultado.innerHTML = '';
+    if (leitor.stream) {
+        leitor.ativo = true;
+        requestAnimationFrame(lerQuadro);
+    } else {
+        iniciarLeitor();
+    }
+    document.getElementById('reader').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
