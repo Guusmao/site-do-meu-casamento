@@ -71,7 +71,7 @@ Deno.serve(async (req: Request) => {
     try {
       const primeiroNome = nomesVao[0].split(" ")[0];
       const waId = evolution
-        ? await enviarImagemEvolution(confirmacao.whatsapp, qrUrl, legendaIngresso(primeiroNome, nomesVao))
+        ? await enviarIngressoEvolution(confirmacao.whatsapp, confirmacao.qr_token, qrUrl, legendaIngresso(primeiroNome, nomesVao))
         : // Template: cabeçalho = imagem do QR; {{1}} = primeiro nome; {{2}} = quem vai
           await enviarTemplate(confirmacao.whatsapp, template, [
             { type: "header", parameters: [{ type: "image", image: { link: qrUrl } }] },
@@ -114,6 +114,20 @@ function json(body: unknown, status = 200) {
 // ["Ana", "João", "Maria"] -> "Ana, João e Maria"
 function juntarNomes(nomes: string[]) {
   return nomes.length > 1 ? `${nomes.slice(0, -1).join(", ")} e ${nomes[nomes.length - 1]}` : nomes[0];
+}
+
+// Pela Evolution manda a arte do ingresso (gerada no site em /api/ingresso).
+// Se a arte falhar por algum motivo, manda o QR simples para o convidado não
+// ficar sem ingresso.
+async function enviarIngressoEvolution(para: string, token: string, qrUrl: string, legenda: string) {
+  const site = (Deno.env.get("SITE_URL") ?? "https://casamento-sarah-e-felipe.vercel.app").replace(/\/+$/, "");
+  const arteUrl = `${site}/api/ingresso?t=${encodeURIComponent(token)}`;
+  try {
+    return await enviarImagemEvolution(para, arteUrl, legenda);
+  } catch (e) {
+    console.error("Falha ao enviar a arte do ingresso, mandando o QR simples:", e);
+    return await enviarImagemEvolution(para, qrUrl, legenda);
+  }
 }
 
 // Texto que acompanha o QR Code quando o envio é pela Evolution

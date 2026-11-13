@@ -81,6 +81,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Destaca no menu a parte do site que está na tela enquanto a pessoa rola
+    const navSecaoAtual = document.getElementById('navSecaoAtual');
+    const linksPorSecao = new Map();
+    navLinks.forEach((link) => {
+        const id = link.getAttribute('href')?.slice(1);
+        const secao = id && document.getElementById(id);
+        if (secao) linksPorSecao.set(secao, link);
+    });
+    const secoesDoMenu = Array.from(linksPorSecao.keys());
+
+    const marcarSecaoAtual = () => {
+        // A seção "atual" é a última cujo topo já passou da linha a 35% da altura da tela
+        const linha = window.innerHeight * 0.35;
+        let atual = null;
+        secoesDoMenu.forEach((secao) => {
+            if (secao.getBoundingClientRect().top <= linha) atual = secao;
+        });
+        // Chegou ao fim da página: marca a última seção
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+            atual = secoesDoMenu[secoesDoMenu.length - 1];
+        }
+        linksPorSecao.forEach((link, secao) => {
+            const ativo = secao === atual;
+            link.classList.toggle('ativo', ativo);
+            if (ativo) link.setAttribute('aria-current', 'location');
+            else link.removeAttribute('aria-current');
+        });
+        if (navSecaoAtual) {
+            const texto = atual ? linksPorSecao.get(atual).textContent.trim() : '';
+            if (navSecaoAtual.textContent !== texto) navSecaoAtual.textContent = texto;
+            navSecaoAtual.classList.toggle('visivel', Boolean(texto));
+        }
+    };
+
+    let agendado = false;
+    window.addEventListener('scroll', () => {
+        if (agendado) return;
+        agendado = true;
+        requestAnimationFrame(() => { agendado = false; marcarSecaoAtual(); });
+    }, { passive: true });
+    window.addEventListener('resize', marcarSecaoAtual);
+    marcarSecaoAtual();
+
     /* ==========================================================================
        2. CONTAGEM REGRESSIVA
        ========================================================================== */

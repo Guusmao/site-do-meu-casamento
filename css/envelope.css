@@ -76,10 +76,17 @@
 }
 
 .envelope {
+    /* Largura única usada pelo envelope e pelos triângulos da frente e da aba */
+    --env-w: min(82vw, 300px);
     position: relative;
-    width: min(82vw, 300px);
-    height: calc(min(82vw, 300px) * 0.7667);
+    width: var(--env-w);
+    height: calc(var(--env-w) * 0.7667);
     overflow: hidden;
+    /* Cantos arredondados iguais aos do envelope e uma faixa da cor da frente
+       no pé, para não sobrar a linha branca do fundo quando a conta dos
+       triângulos arredonda para baixo */
+    border-radius: 10px;
+    background: linear-gradient(to top, var(--envelope-cover) 3px, transparent 3px);
 }
 
 .envelope::before {
@@ -87,9 +94,9 @@
     position: absolute;
     top: 0;
     z-index: 3;
-    border-top: calc(min(82vw, 300px) * 0.4333) solid var(--envelope-tab);
-    border-right: calc(min(82vw, 300px) * 0.5) solid transparent;
-    border-left: calc(min(82vw, 300px) * 0.5) solid transparent;
+    border-top: calc(var(--env-w) * 0.4333) solid var(--envelope-tab);
+    border-right: calc(var(--env-w) * 0.5) solid transparent;
+    border-left: calc(var(--env-w) * 0.5) solid transparent;
     transform-origin: top;
     transition: transform 0.5s ease-in-out;
 }
@@ -100,10 +107,10 @@
     z-index: 2;
     width: 0;
     height: 0;
-    border-top: calc(min(82vw, 300px) * 0.4333) solid transparent;
-    border-right: calc(min(82vw, 300px) * 0.5) solid var(--envelope-cover);
-    border-bottom: calc(min(82vw, 300px) * 0.3333) solid var(--envelope-cover);
-    border-left: calc(min(82vw, 300px) * 0.5) solid var(--envelope-cover);
+    border-top: calc(var(--env-w) * 0.4333) solid transparent;
+    border-right: calc(var(--env-w) * 0.5) solid var(--envelope-cover);
+    border-bottom: calc(var(--env-w) * 0.3333) solid var(--envelope-cover);
+    border-left: calc(var(--env-w) * 0.5) solid var(--envelope-cover);
 }
 
 .letter {
@@ -175,6 +182,16 @@
     pointer-events: none;
 }
 
+/* Monograma oficial (moldura oval com gregas) como selo do envelope */
+.seal-monograma {
+    display: block;
+    width: auto;
+    height: 128px;
+    max-width: none;
+    filter: drop-shadow(0 4px 10px rgba(18, 63, 122, 0.30));
+    pointer-events: none;
+}
+
 .heart:hover {
     transform: translate(-50%, -26%) scale(1.03);
 }
@@ -224,8 +241,7 @@
     }
 
     .envelope {
-        width: min(88vw, 300px);
-        height: calc(min(88vw, 300px) * 0.7667);
+        --env-w: min(88vw, 300px);
     }
 
     .letter .text {
