@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
     try {
       const estado = await estadoEvolution();
       if (estado === "open") return Response.json({ estado });
-      return Response.json({ estado, codigo: await codigoPareamentoEvolution(numero) });
+      return Response.json({ estado, codigo: await codigoPareamentoEvolution(numero, url.searchParams.has("limpar")) });
     } catch (e) {
       return Response.json({ error: String(e) }, { status: 502 });
     }

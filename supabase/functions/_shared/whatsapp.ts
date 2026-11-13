@@ -172,8 +172,13 @@ export async function estadoEvolution(): Promise<string> {
 
 // Pede um código de pareamento (8 letras) para conectar o número sem ler QR:
 // no celular, Aparelhos conectados > Conectar aparelho > Conectar com número.
-export async function codigoPareamentoEvolution(numero: string) {
+export async function codigoPareamentoEvolution(numero: string, limpar = false) {
   const { base, apiKey, instancia } = configEvolution();
+  if (limpar) {
+    // Descarta a sessão antiga presa antes de pedir o código
+    await fetch(`${base}/instance/logout/${encodeURIComponent(instancia)}`, { method: "DELETE", headers: { apikey: apiKey } }).catch(() => {});
+    await new Promise((r) => setTimeout(r, 3000));
+  }
   const resp = await fetch(
     `${base}/instance/connect/${encodeURIComponent(instancia)}?number=${encodeURIComponent(numero.replace(/\D/g, ""))}`,
     { headers: { apikey: apiKey } }
