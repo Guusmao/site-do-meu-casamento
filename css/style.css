@@ -369,6 +369,20 @@ p {
     width: 100%;
 }
 
+/* Parte do site que está na tela (marcada pelo JavaScript ao rolar) */
+.nav-link.ativo {
+    color: var(--color-primary);
+}
+
+.nav-link.ativo::after {
+    width: 100%;
+}
+
+/* Nome da seção atual ao lado do logo: só aparece no celular */
+.nav-secao-atual {
+    display: none;
+}
+
 .btn-rsvp-nav {
     background-color: var(--color-primary);
     color: var(--color-white) !important;
@@ -1769,6 +1783,44 @@ p {
         opacity: 1;
         transform: translateY(0);
         pointer-events: auto;
+    }
+
+    /* No menu aberto, a parte atual ganha um fundo suave */
+    .nav-link.ativo {
+        background: rgba(143, 168, 200, 0.16);
+        border-radius: var(--radius-md);
+    }
+
+    .nav-link.ativo::after {
+        width: 0;
+    }
+
+    .btn-rsvp-nav.ativo {
+        background-color: var(--color-primary);
+    }
+
+    /* Ao rolar, mostra ao lado do logo em que parte do site a pessoa está */
+    .nav-secao-atual {
+        display: block;
+        margin-left: auto;
+        margin-right: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--color-text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 45vw;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .navbar-container.scrolled .nav-secao-atual.visivel {
+        opacity: 1;
+        transform: translateY(0);
     }
     
     .btn-rsvp-nav {
