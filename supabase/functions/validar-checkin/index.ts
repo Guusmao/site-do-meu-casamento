@@ -18,7 +18,10 @@ Deno.serve(async (req: Request) => {
     const { token, senha_portaria, nome } = await req.json();
 
     // Senha simples da portaria (evita que a página fique aberta pra qualquer um usar)
-    if (senha_portaria !== Deno.env.get("PORTARIA_SENHA")) {
+    // trim() dos dois lados: um espaço ou quebra de linha colado junto no
+    // segredo (ou digitado no celular) não pode travar a portaria.
+    const senhaCerta = (Deno.env.get("PORTARIA_SENHA") ?? "").trim();
+    if (!senhaCerta || String(senha_portaria ?? "").trim() !== senhaCerta) {
       return new Response(JSON.stringify({ error: "Senha da portaria inválida." }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
