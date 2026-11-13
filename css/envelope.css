@@ -7,9 +7,10 @@
     --primary: var(--color-white);
     --bg-color: var(--color-bg);
     --bg-envelope-color: var(--color-white);
-    --envelope-tab: var(--color-primary-light);
-    --envelope-cover: var(--color-primary);
-    --shadow-color: rgba(86, 106, 140, 0.22);
+    /* Envelope cor de papel, para o monograma aparecer nas cores originais */
+    --envelope-tab: #E9E1DA;
+    --envelope-cover: #F4EEE9;
+    --shadow-color: rgba(86, 106, 140, 0.28);
     --txt-color: var(--color-text);
 }
 
@@ -70,7 +71,7 @@
     position: relative;
     z-index: 2;
     background: var(--bg-envelope-color);
-    border-radius: 10px;
+    border-radius: 0;
     box-shadow: 0 18px 40px var(--shadow-color);
     padding: 0;
 }
@@ -82,10 +83,8 @@
     width: var(--env-w);
     height: calc(var(--env-w) * 0.7667);
     overflow: hidden;
-    /* Cantos arredondados iguais aos do envelope e uma faixa da cor da frente
-       no pé, para não sobrar a linha branca do fundo quando a conta dos
-       triângulos arredonda para baixo */
-    border-radius: 10px;
+    /* Faixa da cor da frente no pé, para não sobrar a linha branca do fundo
+       quando a conta dos triângulos arredonda para baixo */
     background: linear-gradient(to top, var(--envelope-cover) 3px, transparent 3px);
 }
 
@@ -182,13 +181,12 @@
     pointer-events: none;
 }
 
-/* Monograma oficial (moldura oval com gregas) como selo do envelope */
+/* Monograma oficial (moldura oval com gregas), nas cores originais, como selo */
 .seal-monograma {
     display: block;
     width: auto;
-    height: 128px;
+    height: 132px;
     max-width: none;
-    filter: drop-shadow(0 4px 10px rgba(18, 63, 122, 0.30));
     pointer-events: none;
 }
 
