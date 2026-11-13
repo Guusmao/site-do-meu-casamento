@@ -1,30 +1,33 @@
 // api/ingresso.js
-// Gera a imagem do ingresso (PNG) que o robô manda no WhatsApp:
-// a mesma arte do antigo ingresso por e-mail, com o QR Code e os nomes.
+// Gera a imagem do ingresso (PNG) que o robô manda no WhatsApp, com a
+// identidade do site: aquarela de hortênsias e limões, monograma S&F,
+// azul e amarelo, Playfair Display + Inter.
 //
 // Uso: /api/ingresso?t=<qr_token>
 // O token é o mesmo do QR Code (assinado no Supabase). Aqui ele só é lido
 // para mostrar os nomes; quem valida a entrada é a função validar-checkin.
+// As imagens e fontes ficam em /assets/images/ingresso/.
 
 import { ImageResponse } from '@vercel/og';
 import qrcode from 'qrcode-generator';
 
 export const config = { runtime: 'edge' };
 
-const CORES = {
-    fundo: '#f3efe9',
-    cartao: '#fffdf9',
-    borda: '#d9cdb8',
-    escuro: '#2d2a26',
-    claro: '#f3efe9',
-    texto: '#4a4640',
-    rotulo: '#9a8f78',
-    rodape: '#efe8db',
-    rodapeTexto: '#6b6355',
+const COR = {
+    papel: '#F7F3F0',      // fundo da aquarela
+    marinho: '#123F7A',    // azul do monograma
+    azul: '#8FA8C8',       // azul do site
+    amarelo: '#E3AE2F',    // amarelo do site, um pouco mais escuro para ler bem
+    texto: '#2D2825',
+    suave: '#736B67',
+    cartao: '#FFFFFF',
 };
+
+const LARGURA = 1080;
 
 // Atalho para montar os elementos sem JSX
 const h = (type, style, children) => ({ type, props: { style: { display: 'flex', ...style }, children } });
+const img = (src, width, height, style = {}) => ({ type: 'img', props: { src, width, height, style } });
 
 function lerNomes(token) {
     try {
@@ -53,17 +56,21 @@ function qrDataUrl(texto) {
     }
     const lado = n + m * 2;
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${lado} ${lado}" shape-rendering="crispEdges">` +
-        `<rect width="${lado}" height="${lado}" fill="${CORES.cartao}"/><path d="${d}" fill="${CORES.escuro}"/></svg>`;
+        `<rect width="${lado}" height="${lado}" fill="#FFFFFF"/><path d="${d}" fill="${COR.marinho}"/></svg>`;
     return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
-async function carregarFonte(url) {
-    try {
-        const resp = await fetch(url);
-        return resp.ok ? await resp.arrayBuffer() : null;
-    } catch {
-        return null;
-    }
+function paraBase64(buf) {
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+}
+
+async function baixar(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Falha ao carregar ${url}: ${resp.status}`);
+    return resp.arrayBuffer();
 }
 
 export default async function handler(req) {
@@ -73,66 +80,78 @@ export default async function handler(req) {
         return new Response('Ingresso inválido', { status: 400 });
     }
 
+    const base = new URL('/assets/images/ingresso/', req.url).href;
+    const [topo, rodape, monograma, pf400, pf400i, pf600, in400, in500] = await Promise.all([
+        baixar(base + 'fundo-topo.jpg'),
+        baixar(base + 'fundo-base.jpg'),
+        baixar(base + 'monograma.png'),
+        baixar(base + 'playfair-400.woff'),
+        baixar(base + 'playfair-400-italic.woff'),
+        baixar(base + 'playfair-600.woff'),
+        baixar(base + 'inter-400.woff'),
+        baixar(base + 'inter-500.woff'),
+    ]);
+
     const nomes = lerNomes(token);
-    const qrUrl = qrDataUrl(token);
+    const listaNomes = nomes.length ? nomes : ['Convidados'];
+    const altura = 1720 + Math.max(0, listaNomes.length - 2) * 52;
 
-    const playfair = await carregarFonte(
-        'https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@latest/latin-400-normal.ttf'
-    );
-    const serif = playfair ? 'Playfair' : 'serif';
-
-    const largura = 1080;
-    const alturaNomes = Math.max(1, nomes.length) * 46;
-    const altura = 1240 + alturaNomes;
+    const serif = { fontFamily: 'Playfair' };
+    const sans = { fontFamily: 'Inter' };
 
     const arte = h('div', {
-        width: '100%', height: '100%', background: CORES.fundo,
-        alignItems: 'center', justifyContent: 'center', padding: 60,
+        position: 'relative', width: '100%', height: '100%', background: COR.papel,
+        flexDirection: 'column', alignItems: 'center',
     }, [
+        // Aquarela: hortênsias e limões no topo e no rodapé
+        img(`data:image/jpeg;base64,${paraBase64(topo)}`, LARGURA, 420, { position: 'absolute', top: 0, left: 0 }),
+        img(`data:image/jpeg;base64,${paraBase64(rodape)}`, LARGURA, 420, { position: 'absolute', bottom: 0, left: 0 }),
+
+        // Monograma e nomes do casal
+        h('div', { flexDirection: 'column', alignItems: 'center', marginTop: 70 }, [
+            img(`data:image/png;base64,${paraBase64(monograma)}`, 230, 206),
+            h('div', { ...sans, fontSize: 24, letterSpacing: 8, color: COR.suave, marginTop: 26, textTransform: 'uppercase' },
+                'Ingresso do casamento de'),
+            h('div', { ...serif, fontSize: 92, color: COR.marinho, marginTop: 6, fontWeight: 600 }, 'Sarah & Felipe'),
+            h('div', { alignItems: 'center', marginTop: 10 }, [
+                h('div', { width: 70, height: 2, background: COR.amarelo }),
+                h('div', { ...serif, fontStyle: 'italic', fontSize: 36, color: COR.texto, margin: '0 22px' }, '08 de fevereiro de 2027'),
+                h('div', { width: 70, height: 2, background: COR.amarelo }),
+            ]),
+        ]),
+
+        // Cartão branco com o QR e os convidados
         h('div', {
-            flexDirection: 'column', width: '100%', height: '100%',
-            background: CORES.cartao, border: `2px solid ${CORES.borda}`, borderRadius: 36, overflow: 'hidden',
+            flexDirection: 'column', alignItems: 'center', marginTop: 44, width: 780,
+            background: 'rgba(255,255,255,0.88)', borderRadius: 36, padding: '44px 50px 40px',
+            border: `2px solid rgba(143,168,200,0.45)`, boxShadow: '0 10px 40px rgba(18,63,122,0.10)',
         }, [
-            // Faixa escura do topo
-            h('div', {
-                flexDirection: 'column', alignItems: 'center', background: CORES.escuro,
-                color: CORES.claro, padding: '56px 40px',
-            }, [
-                h('div', { fontSize: 26, letterSpacing: 7, textTransform: 'uppercase', opacity: 0.8 }, 'Convite de Casamento'),
-                h('div', { fontSize: 76, marginTop: 14, fontFamily: serif }, 'Sarah & Felipe'),
-                h('div', { fontSize: 28, marginTop: 14, opacity: 0.85 }, '08 de Fevereiro de 2027'),
-            ]),
-            // QR e nomes
-            h('div', { flexDirection: 'column', alignItems: 'center', padding: '44px 60px', flexGrow: 1 }, [
-                h('div', { fontSize: 28, color: CORES.texto, textAlign: 'center', marginBottom: 32 },
-                    'Apresente este QR Code na entrada do evento.'),
-                {
-                    type: 'img',
-                    props: {
-                        src: qrUrl, width: 480, height: 480,
-                        style: { borderRadius: 24, border: `2px solid #e4dbc8` },
-                    },
-                },
-                h('div', {
-                    fontSize: 22, letterSpacing: 5, textTransform: 'uppercase',
-                    color: CORES.rotulo, marginTop: 40, marginBottom: 12,
-                }, 'Convidados neste ingresso'),
-                h('div', { flexDirection: 'column', alignItems: 'center' },
-                    (nomes.length ? nomes : ['—']).map((n) =>
-                        h('div', { fontSize: 34, color: CORES.escuro, lineHeight: 1.35, fontFamily: serif }, n))),
-            ]),
-            // Rodapé
-            h('div', {
-                justifyContent: 'center', background: CORES.rodape, color: CORES.rodapeTexto,
-                fontSize: 24, padding: '26px 30px',
-            }, 'Guarde esta mensagem: o QR Code será conferido na entrada.'),
+            img(qrDataUrl(token), 440, 440, { borderRadius: 20 }),
+            h('div', { ...sans, fontSize: 22, letterSpacing: 6, color: COR.azul, marginTop: 34, textTransform: 'uppercase', fontWeight: 500 },
+                nomes.length > 1 ? 'Convidados' : 'Convidado(a)'),
+            h('div', { flexDirection: 'column', alignItems: 'center', marginTop: 10 },
+                listaNomes.map((n) => h('div', { ...serif, fontSize: 40, color: COR.texto, lineHeight: 1.3, textAlign: 'center' }, n))),
+        ]),
+
+        // Local e horário
+        h('div', { flexDirection: 'column', alignItems: 'center', marginTop: 40 }, [
+            h('div', { ...sans, fontSize: 30, color: COR.marinho, fontWeight: 500 }, '16h30  ·  Villa Garden Buffet'),
+            h('div', { ...sans, fontSize: 24, color: COR.suave, marginTop: 8 }, 'Rua Dr. Rodrigo Codes Sandoval, 76 · Maraponga, Fortaleza'),
+            h('div', { ...serif, fontStyle: 'italic', fontSize: 28, color: COR.texto, marginTop: 26 },
+                'Apresente este QR Code na entrada. Contamos com você!'),
         ]),
     ]);
 
     return new ImageResponse(arte, {
-        width: largura,
+        width: LARGURA,
         height: altura,
-        fonts: playfair ? [{ name: 'Playfair', data: playfair, weight: 400, style: 'normal' }] : undefined,
+        fonts: [
+            { name: 'Playfair', data: pf400, weight: 400, style: 'normal' },
+            { name: 'Playfair', data: pf400i, weight: 400, style: 'italic' },
+            { name: 'Playfair', data: pf600, weight: 600, style: 'normal' },
+            { name: 'Inter', data: in400, weight: 400, style: 'normal' },
+            { name: 'Inter', data: in500, weight: 500, style: 'normal' },
+        ],
         headers: { 'Cache-Control': 'public, max-age=31536000, immutable' },
     });
 }
