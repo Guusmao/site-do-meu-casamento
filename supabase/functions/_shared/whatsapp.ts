@@ -107,6 +107,7 @@ export async function enviarImagemEvolution(
   });
 
   const data = await resp.json().catch(() => ({}));
+  console.log("evolution sendMedia:", resp.status, JSON.stringify(data?.key ?? data).slice(0, 300));
   if (!resp.ok) {
     const detalhe = data?.response?.message ?? data?.message ?? data?.error ?? resp.status;
     throw new Error(`Evolution recusou o envio: ${typeof detalhe === "string" ? detalhe : JSON.stringify(detalhe)}`);
@@ -132,6 +133,7 @@ export async function enviarTextoEvolution(para: string, texto: string): Promise
     body: JSON.stringify({ number: para, text: texto, delay: 1200 + Math.floor(Math.random() * 1800) }),
   });
   const data = await resp.json().catch(() => ({}));
+  console.log("evolution sendText:", resp.status, JSON.stringify(data?.key ?? data).slice(0, 300));
   if (!resp.ok) {
     const detalhe = data?.response?.message ?? data?.message ?? data?.error ?? resp.status;
     throw new Error(`Evolution recusou o texto: ${typeof detalhe === "string" ? detalhe : JSON.stringify(detalhe)}`);

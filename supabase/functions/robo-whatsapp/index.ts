@@ -69,8 +69,12 @@ Deno.serve(async (req: Request) => {
 });
 
 async function tratar(evento: any) {
-  if (!evento || !String(evento.event ?? "").toLowerCase().includes("messages.upsert")) return;
-  const msgs = Array.isArray(evento.data) ? evento.data : [evento.data];
+  // A Evolution manda "messages.upsert" ou "MESSAGES_UPSERT", conforme a versão
+  const nomeEvento = String(evento?.event ?? "").toLowerCase().replace(/_/g, ".");
+  const bruto = evento?.data?.messages ?? evento?.data;
+  const msgs = Array.isArray(bruto) ? bruto : [bruto];
+  console.log("robo-whatsapp evento:", nomeEvento, JSON.stringify(msgs.map((m: any) => ({ key: m?.key, ts: m?.messageTimestamp, tipo: m?.messageType }))));
+  if (!nomeEvento.includes("messages.upsert")) return;
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
@@ -79,7 +83,8 @@ async function tratar(evento: any) {
     const jid: string = key.remoteJid ?? "";
     if (key.fromMe || !jid || jid.endsWith("@g.us") || jid === "status@broadcast" || jid.endsWith("@newsletter")) continue;
     // Mensagens antigas (ex: sincronização quando o número reconecta) não recebem resposta
-    const enviadaEm = Number(m.messageTimestamp ?? 0) * 1000;
+    let enviadaEm = Number(m.messageTimestamp ?? 0);
+    if (enviadaEm && enviadaEm < 1e12) enviadaEm *= 1000; // segundos -> ms
     if (enviadaEm && Date.now() - enviadaEm > 10 * 60_000) continue;
 
     // Número de telefone: pode vir no remoteJid ou, quando o WhatsApp usa LID, em outro campo
