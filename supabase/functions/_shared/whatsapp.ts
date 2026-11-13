@@ -99,7 +99,9 @@ export async function enviarImagemEvolution(
       number: para,
       mediatype: "image",
       mimetype: "image/png",
-      media: imagemUrl,
+      // Manda a imagem já em base64: depois de reconectar, a Evolution aceitava o
+      // link mas a imagem não chegava. Se não der para baixar, volta para o link.
+      media: (await baixarBase64(imagemUrl)) ?? imagemUrl,
       fileName: "ingresso.png",
       caption: legenda,
       delay: 1500 + Math.floor(Math.random() * 2500),
@@ -188,4 +190,17 @@ export async function codigoPareamentoEvolution(numero: string, limpar = false) 
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok) throw new Error(`Evolution recusou: ${JSON.stringify(data)}`);
   return data?.pairingCode ?? null;
+}
+
+async function baixarBase64(url: string): Promise<string | null> {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const bytes = new Uint8Array(await resp.arrayBuffer());
+    let bin = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  } catch {
+    return null;
+  }
 }
