@@ -182,12 +182,13 @@
     pointer-events: none;
 }
 
-/* Monograma S&F (letras do logo oficial, em branco) no lugar do texto */
+/* Monograma oficial (moldura oval com gregas) como selo do envelope */
 .seal-monograma {
     display: block;
     width: auto;
-    height: 74px;
-    filter: drop-shadow(0 2px 6px rgba(18, 63, 122, 0.35));
+    height: 128px;
+    max-width: none;
+    filter: drop-shadow(0 4px 10px rgba(18, 63, 122, 0.30));
     pointer-events: none;
 }
 
