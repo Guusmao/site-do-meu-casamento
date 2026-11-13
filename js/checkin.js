@@ -18,14 +18,35 @@ const areaResultado = document.getElementById('areaResultado');
 
 let senhaPortaria = '';
 
-btnEntrar.addEventListener('click', () => {
+// Confere a senha já no "Entrar": a função validar-checkin checa a senha
+// antes de olhar o QR, então uma chamada sem QR responde 401 se a senha
+// estiver errada (e 400 "QR inválido" se estiver certa).
+async function entrar() {
     if (!senhaInput.value.trim()) return;
     senhaPortaria = senhaInput.value.trim();
     senhaErro.classList.add('hidden');
+    btnEntrar.disabled = true;
+    btnEntrar.textContent = 'Conferindo...';
+    try {
+        const { resp, data } = await chamarFuncao({ token: '' });
+        if (resp.status === 401) {
+            senhaErro.textContent = data.error || 'Senha da portaria inválida.';
+            senhaErro.classList.remove('hidden');
+            return;
+        }
+    } catch {
+        // Sem internet agora: deixa entrar e a senha é conferida na leitura
+    } finally {
+        btnEntrar.disabled = false;
+        btnEntrar.textContent = 'Entrar';
+    }
     telaSenha.classList.add('hidden');
     telaLeitor.classList.remove('hidden');
     iniciarLeitor();
-});
+}
+
+btnEntrar.addEventListener('click', entrar);
+senhaInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') entrar(); });
 
 // Leitor de QR próprio: lê o quadro da câmera na resolução cheia.
 // O QR do ingresso é denso (leva os nomes do grupo), e a biblioteca anterior
