@@ -19,6 +19,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { chaveTelefone, configurarWebhookEvolution, codigoPareamentoEvolution, enviarTextoEvolution, estadoEvolution } from "../_shared/whatsapp.ts";
 import { Confirmacao, enviarIngresso, juntarNomes, nomesQueVao, urlSite } from "../_shared/ingresso.ts";
 
+const NUMEROS_DO_ROBO = ["5585921015856", "558521015856"];
+
 Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
   const chave = await chaveWebhook();
@@ -46,6 +48,9 @@ Deno.serve(async (req: Request) => {
   // o código só serve no celular do próprio número, então não expõe nada)
   const numero = url.searchParams.get("conectar");
   if (numero) {
+    // Só o número do próprio robô pode ser pareado (com ou sem o 9)
+    const digitos = numero.replace(/\D/g, "");
+    if (!NUMEROS_DO_ROBO.includes(digitos)) return Response.json({ error: "Número não permitido." }, { status: 403 });
     try {
       const estado = await estadoEvolution();
       if (estado === "open") return Response.json({ estado });
