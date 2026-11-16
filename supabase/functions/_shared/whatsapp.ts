@@ -113,3 +113,24 @@ export async function enviarImagemEvolution(
   }
   return data?.key?.id;
 }
+
+// Manda só texto pela Evolution API (usado antes do ingresso e pelo robô).
+export async function enviarTextoEvolution(para: string, texto: string): Promise<string | undefined> {
+  const base = Deno.env.get("EVOLUTION_URL")?.trim().replace(/\/+$/, "").replace(/\/manager$/, "");
+  const apiKey = Deno.env.get("EVOLUTION_API_KEY");
+  const instancia = Deno.env.get("EVOLUTION_INSTANCE") ?? "casamento";
+  if (!base || !apiKey) throw new Error("EVOLUTION_URL/EVOLUTION_API_KEY não configurados");
+
+  const resp = await fetch(`${base}/message/sendText/${encodeURIComponent(instancia)}`, {
+    method: "POST",
+    headers: { apikey: apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({ number: para, text: texto, delay: 1200 + Math.floor(Math.random() * 1800) }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  console.log("evolution sendText:", resp.status, JSON.stringify(data?.key ?? data).slice(0, 300));
+  if (!resp.ok) {
+    const detalhe = data?.response?.message ?? data?.message ?? data?.error ?? resp.status;
+    throw new Error(`Evolution recusou o texto: ${typeof detalhe === "string" ? detalhe : JSON.stringify(detalhe)}`);
+  }
+  return data?.key?.id;
+}

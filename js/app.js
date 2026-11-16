@@ -372,6 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const rsvpDdi = document.getElementById('rsvpDdi');
     const rsvpTelefoneLinha = rsvpDdi.closest('.telefone-linha');
     let numeroTravado = false;
+    // Quem salva o número do robô nos contatos recebe o ingresso sem o WhatsApp barrar
+    const NUMERO_ROBO = '+55 85 92101-5856';
+    const AVISO_SALVAR_CONTATO = `Antes de confirmar, salve nos seus contatos o número do casamento: ${NUMERO_ROBO} (Casamento Sarah & Felipe). É dele que chega o seu ingresso.`;
 
     // Monta o número completo, já com o código do país: "+55 11987654321".
     // Se a pessoa digitar o número com "+" ou já com o código do país na frente,
@@ -494,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rsvpTelefoneLinha.style.display = numeroTravado ? 'none' : '';
         rsvpWhatsappHint.textContent = numeroTravado
             ? `O ingresso vai para o WhatsApp com final ${grupo.whatsapp_final}, usado na primeira confirmação. Para trocar o número, fale com os noivos.`
-            : '';
+            : AVISO_SALVAR_CONTATO;
 
         rsvpEtapaBusca.style.display = 'none';
         rsvpForm.style.display = 'block';
@@ -560,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const vao = data.nomes_confirmados || [];
             rsvpSuccessMessage.innerHTML = vao.length > 0
-                ? `Confirmado! Estamos enviando seu convite com o QR Code para o WhatsApp com final <strong>${data.whatsapp_final}</strong>.<br><br>Convidados confirmados: <em>${vao.join(', ')}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`
+                ? `Confirmado! Estamos enviando seu convite com o QR Code para o WhatsApp com final <strong>${data.whatsapp_final}</strong>.<br><br>O ingresso chega do número <strong>${NUMERO_ROBO}</strong>. Se ainda não salvou, salve nos seus contatos como “Casamento Sarah &amp; Felipe”.<br><br>Convidados confirmados: <em>${vao.join(', ')}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`
                 : `Obrigado por nos avisar! Sentiremos a falta de vocês no nosso grande dia.`;
         } catch (err) {
             console.error('Erro ao confirmar presença:', err);
