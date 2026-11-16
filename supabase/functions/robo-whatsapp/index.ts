@@ -16,7 +16,7 @@
 //  - grupos, status e mensagens enviadas pelo próprio robô são ignorados
 
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { chaveTelefone, configurarWebhookEvolution, codigoPareamentoEvolution, enviarTextoEvolution, estadoEvolution } from "../_shared/whatsapp.ts";
+import { chaveTelefone, configurarWebhookEvolution, codigoPareamentoEvolution, enviarTextoEvolution, estadoEvolution, reconectarEvolution } from "../_shared/whatsapp.ts";
 import { Confirmacao, enviarIngresso, juntarNomes, nomesQueVao, urlSite } from "../_shared/ingresso.ts";
 
 const NUMEROS_DO_ROBO = ["5585921015856", "558521015856"];
@@ -41,6 +41,23 @@ Deno.serve(async (req: Request) => {
       return Response.json({ estado: await estadoEvolution() });
     } catch (e) {
       return Response.json({ estado: "erro", error: String(e) }, { status: 502 });
+    }
+  }
+
+  // Vigia (pg_cron a cada 10 min): se a conexão caiu, tenta reconectar com a
+  // sessão salva. Só age quando o estado é "close", então chamar à toa não faz nada.
+  if (url.searchParams.get("vigiar")) {
+    try {
+      const antes = await estadoEvolution();
+      if (antes !== "close") return Response.json({ estado: antes });
+      console.log("robo-whatsapp vigia: conexão caiu, tentando reconectar");
+      await reconectarEvolution();
+      await new Promise((r) => setTimeout(r, 8000));
+      const depois = await estadoEvolution();
+      console.log("robo-whatsapp vigia: depois da tentativa ->", depois);
+      return Response.json({ antes, depois });
+    } catch (e) {
+      return Response.json({ error: String(e) }, { status: 502 });
     }
   }
 

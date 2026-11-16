@@ -40,3 +40,6 @@ select cron.schedule(
   );
   $$
 );
+
+-- 16/11: vigia da conexão do robô (tenta reconectar sozinho quando cai)
+select cron.schedule('vigiar-robo', '*/10 * * * *', $$select net.http_get(url := 'https://faccbfidybfsoplaeqjw.supabase.co/functions/v1/robo-whatsapp?vigiar=1', timeout_milliseconds := 30000)$$);

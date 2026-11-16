@@ -174,6 +174,23 @@ export async function estadoEvolution(): Promise<string> {
   return data?.instance?.state ?? data?.state ?? `http ${resp.status}`;
 }
 
+// Tenta reabrir a conexão usando a sessão já salva no servidor (sem QR nem código).
+// Se a sessão foi perdida, não resolve sozinho: aí precisa do código de pareamento.
+export async function reconectarEvolution() {
+  const { base, apiKey, instancia } = configEvolution();
+  const alvo = `${base}/instance/restart/${encodeURIComponent(instancia)}`;
+  let resp = await fetch(alvo, { method: "POST", headers: { apikey: apiKey } }).catch(() => null);
+  if (!resp || resp.status === 404 || resp.status === 405) {
+    resp = await fetch(alvo, { method: "PUT", headers: { apikey: apiKey } }).catch(() => null);
+  }
+  console.log("evolution restart:", resp?.status, (await resp?.text().catch(() => ""))?.slice(0, 200));
+  // Se o restart não existir nesta versão, o connect também reabre com a sessão salva
+  if (!resp || !resp.ok) {
+    const c = await fetch(`${base}/instance/connect/${encodeURIComponent(instancia)}`, { headers: { apikey: apiKey } }).catch(() => null);
+    console.log("evolution connect:", c?.status);
+  }
+}
+
 // Pede um código de pareamento (8 letras) para conectar o número sem ler QR:
 // no celular, Aparelhos conectados > Conectar aparelho > Conectar com número.
 export async function codigoPareamentoEvolution(numero: string, limpar = false) {
