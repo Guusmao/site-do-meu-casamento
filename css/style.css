@@ -1368,6 +1368,24 @@ p {
     box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.15);
 }
 
+/* WhatsApp: código do país + número na mesma linha */
+.telefone-linha {
+    display: flex;
+    gap: 8px;
+}
+
+.telefone-linha select {
+    flex: 0 0 auto;
+    width: 112px;
+    padding-left: 10px;
+    padding-right: 6px;
+}
+
+.telefone-linha input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
 .form-error {
     color: var(--color-danger);
     font-size: 0.8rem;

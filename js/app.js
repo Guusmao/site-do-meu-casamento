@@ -369,10 +369,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let grupoAtual = null; // { grupo_id, nome, integrantes, quantidade_maxima }
 
-    // Aceita (11) 98765-4321, 11987654321, +55 11 98765-4321 ou número de fora com "+"
-    const validateWhatsapp = (tel) => {
-        const digitos = tel.replace(/\D/g, '');
-        return tel.trim().startsWith('+') ? digitos.length >= 11 && digitos.length <= 15 : [10, 11, 12, 13].includes(digitos.length);
+    const rsvpDdi = document.getElementById('rsvpDdi');
+
+    // Monta o número completo, já com o código do país: "+55 11987654321".
+    // Se a pessoa digitar o número com "+" ou já com o código do país na frente,
+    // o que ela digitou vale e a caixinha é ignorada.
+    const montarWhatsapp = (tel) => {
+        const bruto = tel.trim();
+        if (!bruto) return '';
+        let digitos = bruto.replace(/\D/g, '');
+        if (bruto.startsWith('+')) return `+${digitos}`;
+        const ddi = rsvpDdi.value;
+        if (ddi === '55') {
+            digitos = digitos.replace(/^0+/, '');
+            if (digitos.length >= 12 && digitos.startsWith('55')) digitos = digitos.slice(2);
+        } else if (digitos.startsWith(ddi) && digitos.length > ddi.length + 7) {
+            digitos = digitos.slice(ddi.length);
+        }
+        return `+${ddi}${digitos}`;
+    };
+
+    rsvpDdi.addEventListener('change', () => {
+        rsvpWhatsapp.placeholder = rsvpDdi.value === '55' ? '(11) 98765-4321' : 'Número com código de área';
+    });
+
+    // Brasil: DDD + número (10 ou 11 dígitos). Outros países: 11 a 15 dígitos no total.
+    const validateWhatsapp = (completo) => {
+        const digitos = completo.replace(/\D/g, '');
+        if (digitos.startsWith('55') && rsvpDdi.value === '55' && !rsvpWhatsapp.value.trim().startsWith('+')) {
+            return [12, 13].includes(digitos.length);
+        }
+        return digitos.length >= 11 && digitos.length <= 15;
     };
 
     // Cria uma linha "nome + vai/não vai". O nome vem da lista de convidados
@@ -457,6 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Grupo com número cadastrado: o campo é opcional (só para trocar o número)
         rsvpWhatsapp.value = '';
+        rsvpDdi.value = '55';
+        rsvpWhatsapp.placeholder = '(11) 98765-4321';
         rsvpWhatsapp.closest('.form-group').classList.remove('error');
         rsvpWhatsappHint.textContent = grupo.whatsapp_final
             ? `Deixe em branco para receber no WhatsApp cadastrado, com final ${grupo.whatsapp_final}.`
@@ -482,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             vai: linha.querySelector('.rsvp-vai-select').value === 'sim'
         })).filter((n) => n.nome.length > 0);
 
-        const whatsapp = rsvpWhatsapp.value.trim();
+        const whatsapp = montarWhatsapp(rsvpWhatsapp.value);
         const algumVai = nomes.some((n) => n.vai);
         // Sem número cadastrado, o WhatsApp é obrigatório (exceto se ninguém vai)
         const whatsappValido = whatsapp
