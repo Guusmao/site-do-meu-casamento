@@ -171,6 +171,8 @@ Deno.serve(async (req: Request) => {
         responsavel: grupo.responsavel,
         nomes_confirmados: nomesVao,
         whatsapp_final: whatsapp ? whatsapp.slice(-4) : null,
+        // O site mostra o ingresso na hora, sem depender do WhatsApp entregar
+        qr_token: nomesVao.length > 0 ? token : null,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

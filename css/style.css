@@ -2190,3 +2190,22 @@ p {
     font-weight: 500;
     color: var(--color-text, #4a4a4a);
 }
+
+/* Ingresso mostrado no site logo após a confirmação */
+.rsvp-ingresso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin: 8px 0 20px;
+}
+.rsvp-ingresso[hidden] { display: none; }
+.rsvp-ingresso img {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(18, 63, 122, 0.15);
+    background: #F7F3F0;
+    min-height: 200px;
+}
+.rsvp-ingresso .btn-primary { text-decoration: none; }

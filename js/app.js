@@ -563,8 +563,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const vao = data.nomes_confirmados || [];
             rsvpSuccessMessage.innerHTML = vao.length > 0
-                ? `Confirmado! Estamos enviando seu convite com o QR Code para o WhatsApp com final <strong>${data.whatsapp_final}</strong>.<br><br>O ingresso chega do número <strong>${NUMERO_ROBO}</strong>. Se ainda não salvou, salve nos seus contatos como “Casamento Sarah &amp; Felipe”.<br><br>Convidados confirmados: <em>${vao.join(', ')}</em><br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`
+                ? `Confirmado! Convidados confirmados: <em>${vao.join(', ')}</em>.<br><br>Este é o seu ingresso: <strong>salve a imagem</strong> (ou tire um print) e mostre o QR Code na entrada. Também vamos tentar mandar uma cópia para o WhatsApp com final <strong>${data.whatsapp_final}</strong>, do número <strong>${NUMERO_ROBO}</strong>.<br><br>Nos vemos no dia 08 de Fevereiro de 2027! ♥`
                 : `Obrigado por nos avisar! Sentiremos a falta de vocês no nosso grande dia.`;
+            mostrarIngresso(vao.length > 0 ? data.qr_token : null);
         } catch (err) {
             console.error('Erro ao confirmar presença:', err);
             alert('Ocorreu um erro ao confirmar sua presença. Tente novamente.');
@@ -574,8 +575,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Mostra a arte do ingresso logo após a confirmação, com botão para salvar
+    const rsvpIngresso = document.getElementById('rsvpIngresso');
+    const rsvpIngressoImg = document.getElementById('rsvpIngressoImg');
+    const rsvpIngressoBaixar = document.getElementById('rsvpIngressoBaixar');
+    function mostrarIngresso(token) {
+        if (!token) {
+            rsvpIngresso.hidden = true;
+            rsvpIngressoImg.removeAttribute('src');
+            return;
+        }
+        const url = `/api/ingresso?t=${encodeURIComponent(token)}`;
+        rsvpIngressoImg.src = url;
+        rsvpIngressoBaixar.href = url;
+        rsvpIngresso.hidden = false;
+    }
+
     // Volta ao formulário para uma nova consulta
     rsvpEditBtn.addEventListener('click', () => {
+        mostrarIngresso(null);
         rsvpSuccessContainer.classList.remove('active');
         rsvpFormContainer.style.display = 'block';
         rsvpForm.style.display = 'none';
