@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingressos — Casamento Sarah & Felipe</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/branding/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/branding/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    /* Mesmas cores do site e do check-in */
+    :root {
+        --bg: #E8EFF7;
+        --card: rgba(255, 255, 255, 0.86);
+        --card-borda: rgba(143, 168, 200, 0.35);
+        --primaria: #8FA8C8;
+        --marinho: #123F7A;
+        --text: #2D2825;
+        --muted: #736B67;
+        --campo: #F7F9FC;
+        --danger: #D32F2F;
+        --warn: #B26A00;
+        --success: #2E7D32;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: 'Inter', -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 24px 16px 40px;
+    }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    h1 { font-family: 'Playfair Display', serif; font-weight: 600; color: var(--marinho); font-size: 1.6rem; margin: 0 0 4px; text-align: center; }
+    .sub { color: var(--muted); text-align: center; margin: 0 0 20px; font-size: 0.92rem; }
+    .card { background: var(--card); border: 1px solid var(--card-borda); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    input, button { font: inherit; }
+    input[type=password] { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--card-borda); background: var(--campo); margin-bottom: 10px; }
+    button { width: 100%; padding: 14px; border: 0; border-radius: 10px; background: var(--marinho); color: #fff; font-weight: 600; cursor: pointer; }
+    button.sec { background: transparent; color: var(--marinho); border: 1px solid var(--card-borda); margin-top: 8px; }
+    .erro { color: var(--danger); font-size: 0.9rem; margin-top: 6px; }
+    .resumo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    .num { background: var(--card); border: 1px solid var(--card-borda); border-radius: 12px; padding: 10px; text-align: center; }
+    .num b { display: block; font-size: 1.4rem; }
+    .num span { font-size: 0.8rem; color: var(--muted); }
+    .linha { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .grupo { font-weight: 600; }
+    .nomes { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+    .tag { flex: 0 0 auto; font-size: 0.75rem; font-weight: 600; padding: 4px 8px; border-radius: 999px; white-space: nowrap; }
+    .nao_entregue { background: rgba(211, 47, 47, 0.12); color: var(--danger); }
+    .sem_envio, .enviado { background: rgba(178, 106, 0, 0.12); color: var(--warn); }
+    .entregue { background: rgba(46, 125, 50, 0.12); color: var(--success); }
+    .nao_vai { background: rgba(115, 107, 103, 0.12); color: var(--muted); }
+    .dica { font-size: 0.85rem; color: var(--muted); line-height: 1.45; }
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <h1>Ingressos</h1>
+    <p class="sub">Quem confirmou e se o ingresso chegou no WhatsApp</p>
+
+    <div id="telaSenha" class="card">
+        <input type="password" id="senha" placeholder="Senha (a mesma do check-in)" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button id="entrar">Ver lista</button>
+        <div id="erroSenha" class="erro hidden"></div>
+    </div>
+
+    <div id="telaLista" class="hidden">
+        <div class="resumo" id="resumo"></div>
+        <div class="card dica">
+            <b>Não entregue:</b> o WhatsApp barrou a mensagem. Se a pessoa mandar <b>INGRESSO</b> para o
+            +55 85 92101-5856, o robô responde com o QR Code.<br>
+            <b>Enviado:</b> saiu do robô, mas o WhatsApp ainda não confirmou que chegou.
+        </div>
+        <div id="lista"></div>
+        <button class="sec" id="atualizar">Atualizar</button>
+    </div>
+</div>
+
+<script>
+    const URL_RELATORIO = 'https://faccbfidybfsoplaeqjw.supabase.co/functions/v1/robo-whatsapp?relatorio=1';
+    const ROTULO = { nao_entregue: 'Não entregue', sem_envio: 'Sem envio', enviado: 'Enviado', entregue: 'Entregue', nao_vai: 'Não vai' };
+    const $ = (id) => document.getElementById(id);
+    let senha = '';
+    try { senha = sessionStorage.getItem('senhaIngressos') || ''; } catch (e) {}
+
+    function texto(tag, classe, conteudo) {
+        const el = document.createElement(tag);
+        if (classe) el.className = classe;
+        if (conteudo !== undefined) el.textContent = conteudo;
+        return el;
+    }
+
+    async function carregar() {
+        $('erroSenha').classList.add('hidden');
+        $('entrar').disabled = true;
+        try {
+            const resp = await fetch(URL_RELATORIO, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ senha })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || 'Não foi possível carregar.');
+            try { sessionStorage.setItem('senhaIngressos', senha); } catch (e) {}
+            mostrar(data);
+        } catch (e) {
+            $('telaLista').classList.add('hidden');
+            $('telaSenha').classList.remove('hidden');
+            $('erroSenha').textContent = e.message;
+            $('erroSenha').classList.remove('hidden');
+        } finally {
+            $('entrar').disabled = false;
+        }
+    }
+
+    function mostrar(data) {
+        const linhas = data.linhas || [];
+        const conta = (s) => linhas.filter((l) => l.situacao === s).length;
+        const resumo = $('resumo');
+        resumo.innerHTML = '';
+        [
+            [linhas.length + ' de ' + data.total_grupos, 'convites confirmados'],
+            [conta('entregue'), 'ingressos entregues'],
+            [conta('nao_entregue'), 'não entregues'],
+            [conta('enviado') + conta('sem_envio'), 'aguardando']
+        ].forEach(([n, t]) => {
+            const box = texto('div', 'num');
+            box.appendChild(texto('b', '', String(n)));
+            box.appendChild(texto('span', '', t));
+            resumo.appendChild(box);
+        });
+
+        const lista = $('lista');
+        lista.innerHTML = '';
+        if (linhas.length === 0) lista.appendChild(texto('div', 'card dica', 'Ninguém confirmou ainda.'));
+        linhas.forEach((l) => {
+            const card = texto('div', 'card');
+            const linha = texto('div', 'linha');
+            const esq = texto('div');
+            esq.appendChild(texto('div', 'grupo', l.grupo));
+            const info = [];
+            if (l.vao.length) info.push(l.vao.join(', '));
+            if (l.whatsapp_final) info.push('WhatsApp final ' + l.whatsapp_final);
+            esq.appendChild(texto('div', 'nomes', info.join(' · ')));
+            linha.appendChild(esq);
+            linha.appendChild(texto('span', 'tag ' + l.situacao, ROTULO[l.situacao] || l.situacao));
+            card.appendChild(linha);
+            lista.appendChild(card);
+        });
+
+        $('telaSenha').classList.add('hidden');
+        $('telaLista').classList.remove('hidden');
+    }
+
+    $('entrar').addEventListener('click', () => { senha = $('senha').value.trim(); if (senha) carregar(); });
+    $('senha').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('entrar').click(); });
+    $('atualizar').addEventListener('click', carregar);
+    if (senha) carregar();
+</script>
+</body>
+</html>
