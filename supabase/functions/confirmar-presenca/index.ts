@@ -79,8 +79,19 @@ Deno.serve(async (req: Request) => {
     }
 
     // 3) Para onde vai o ingresso: número digitado ou o do grupo na lista
+    // Segurança: o número digitado só vale quando o grupo ainda não tem nenhum
+    // (nem na lista, nem numa confirmação anterior). Assim ninguém consegue
+    // refazer a confirmação de outro grupo e desviar o ingresso para o próprio WhatsApp.
     let whatsapp = grupo.whatsapp as string | null;
-    if (whatsappDigitado) {
+    if (!whatsapp) {
+      const { data: anterior } = await supabase
+        .from("confirmacoes")
+        .select("whatsapp")
+        .eq("grupo_id", grupo_id)
+        .maybeSingle();
+      whatsapp = anterior?.whatsapp ?? null;
+    }
+    if (whatsappDigitado && !whatsapp) {
       whatsapp = normalizarTelefone(whatsappDigitado);
       if (!whatsapp) {
         return new Response(JSON.stringify({ error: "WhatsApp inválido. Digite com DDD, ex: (11) 98765-4321." }), {
