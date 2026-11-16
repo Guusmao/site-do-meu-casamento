@@ -1,23 +1,15 @@
 // supabase/functions/_shared/whatsapp.ts
-// Envio de mensagens pelo WhatsApp. Dois provedores:
+// Envio de mensagens pelo WhatsApp. Provedores:
+//  - WAHA (motor WEBJS): usado quando configurado (ver waha.ts)
 //  - Evolution API (não oficial, número conectado por QR Code, texto livre)
 //  - WhatsApp Cloud API oficial da Meta (só templates aprovados)
-// A Evolution é usada quando os secrets EVOLUTION_* estão configurados;
-// para forçar a Meta, defina WHATSAPP_PROVEDOR=meta.
+// Os nomes enviarImagemEvolution / enviarTextoEvolution ficaram por
+// compatibilidade: com o WAHA configurado, eles mandam pelo WAHA.
 //
 // Secrets da Evolution (configurados no Supabase, nunca no código):
-//   EVOLUTION_URL        endereço do servidor, ex: https://evolution.seudominio.com
-//   EVOLUTION_API_KEY    chave da API (global ou da instância)
-//   EVOLUTION_INSTANCE   nome da instância conectada, ex: casamento
-//
-// Meta (Cloud API):
-// Fora da janela de 24h de conversa, a Meta só aceita mensagens de template
-// aprovado, então tudo que o robô manda (ingresso e lembretes) é template.
-//
-// Secrets usados (configurados no Supabase, nunca no código):
-//   WHATSAPP_TOKEN            token permanente do usuário do sistema (Meta Business)
-//   WHATSAPP_PHONE_NUMBER_ID  id do número que envia (painel do app na Meta)
-//   WHATSAPP_API_VERSION      opcional, versão da Graph API (padrão abaixo)
+//   EVOLUTION_URL, EVOLUTION_API_KEY, EVOLUTION_INSTANCE
+// Meta (Cloud API): WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_API_VERSION
+import { enviarImagemWaha, enviarTextoWaha, usarWaha } from "./waha.ts";
 
 const API_VERSION_PADRAO = "v23.0";
 
@@ -76,6 +68,7 @@ export function textoParametro(s: string) {
 export function usarEvolution(): boolean {
   const provedor = Deno.env.get("WHATSAPP_PROVEDOR");
   if (provedor === "meta") return false;
+  if (usarWaha()) return true;
   return Boolean(Deno.env.get("EVOLUTION_URL") && Deno.env.get("EVOLUTION_API_KEY"));
 }
 
@@ -86,6 +79,7 @@ export async function enviarImagemEvolution(
   imagemUrl: string,
   legenda: string
 ): Promise<string | undefined> {
+  if (usarWaha()) return await enviarImagemWaha(para, imagemUrl, legenda);
   // Aceita o endereço colado com "/manager" ou barra no final
   const base = Deno.env.get("EVOLUTION_URL")?.trim().replace(/\/+$/, "").replace(/\/manager$/, "");
   const apiKey = Deno.env.get("EVOLUTION_API_KEY");
@@ -116,6 +110,7 @@ export async function enviarImagemEvolution(
 
 // Manda só texto pela Evolution API (usado antes do ingresso e pelo robô).
 export async function enviarTextoEvolution(para: string, texto: string): Promise<string | undefined> {
+  if (usarWaha()) return await enviarTextoWaha(para, texto);
   const base = Deno.env.get("EVOLUTION_URL")?.trim().replace(/\/+$/, "").replace(/\/manager$/, "");
   const apiKey = Deno.env.get("EVOLUTION_API_KEY");
   const instancia = Deno.env.get("EVOLUTION_INSTANCE") ?? "casamento";
