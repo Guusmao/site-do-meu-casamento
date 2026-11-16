@@ -2,8 +2,8 @@
 // Recebe { grupo_id, nomes: [{nome, vai}], whatsapp? }
 // Valida contra a lista fechada, grava a confirmação, gera o token
 // assinado do QR Code e chama a função enviar-ingresso (WhatsApp).
-// O ingresso vai para o número digitado ou, se vier vazio, para o
-// número do grupo cadastrado na lista de convidados.
+// O ingresso vai para o número digitado no site. Só se vier vazio usa o
+// número já gravado na confirmação anterior ou o da lista de convidados.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { assinarToken } from "../_shared/qrToken.ts";
@@ -78,16 +78,24 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // 3) Para onde vai o ingresso: número digitado ou o do grupo na lista
-    let whatsapp = grupo.whatsapp as string | null;
+    // 3) Para onde vai o ingresso: o número digitado no site sempre vale.
+    // Sem número digitado, usa o da confirmação anterior ou o da lista.
+    let whatsapp: string | null = null;
     if (whatsappDigitado) {
       whatsapp = normalizarTelefone(whatsappDigitado);
       if (!whatsapp) {
-        return new Response(JSON.stringify({ error: "WhatsApp inválido. Digite com DDD, ex: (11) 98765-4321." }), {
+        return new Response(JSON.stringify({ error: "WhatsApp inválido. Escolha o país e digite com DDD, ex: (11) 98765-4321." }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+    } else {
+      const { data: anterior } = await supabase
+        .from("confirmacoes")
+        .select("whatsapp")
+        .eq("grupo_id", grupo_id)
+        .maybeSingle();
+      whatsapp = anterior?.whatsapp ?? (grupo.whatsapp as string | null) ?? null;
     }
     if (!whatsapp && quantosVao > 0) {
       return new Response(JSON.stringify({ error: "Digite seu WhatsApp para receber o convite." }), {
@@ -164,5 +172,5 @@ Deno.serve(async (req: Request) => {
 
 // Compara nomes sem diferenciar maiúsculas, acentos e espaços extras
 function chaveNome(nome: string) {
-  return nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+  return nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 }

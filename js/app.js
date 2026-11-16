@@ -482,14 +482,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const integrantes = grupo.integrantes?.length ? grupo.integrantes : [grupo.nome];
         integrantes.forEach((nome) => rsvpNomesContainer.appendChild(criarLinhaNome(nome)));
 
-        // Grupo com número cadastrado: o campo é opcional (só para trocar o número)
+        // O ingresso vai sempre para o WhatsApp digitado aqui (obrigatório se alguém vai)
         rsvpWhatsapp.value = '';
         rsvpDdi.value = '55';
         rsvpWhatsapp.placeholder = '(11) 98765-4321';
         rsvpWhatsapp.closest('.form-group').classList.remove('error');
-        rsvpWhatsappHint.textContent = grupo.whatsapp_final
-            ? `Deixe em branco para receber no WhatsApp cadastrado, com final ${grupo.whatsapp_final}.`
-            : '';
+        rsvpWhatsappHint.textContent = '';
 
         rsvpEtapaBusca.style.display = 'none';
         rsvpForm.style.display = 'block';
@@ -513,10 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const whatsapp = montarWhatsapp(rsvpWhatsapp.value);
         const algumVai = nomes.some((n) => n.vai);
-        // Sem número cadastrado, o WhatsApp é obrigatório (exceto se ninguém vai)
-        const whatsappValido = whatsapp
-            ? validateWhatsapp(whatsapp)
-            : Boolean(grupoAtual?.whatsapp_final) || !algumVai;
+        // O WhatsApp é obrigatório (exceto se ninguém vai)
+        const whatsappValido = whatsapp ? validateWhatsapp(whatsapp) : !algumVai;
         rsvpWhatsapp.closest('.form-group').classList.toggle('error', !whatsappValido);
 
         if (nomes.length === 0) {
