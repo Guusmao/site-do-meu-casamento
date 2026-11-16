@@ -370,6 +370,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let grupoAtual = null; // { grupo_id, nome, integrantes, quantidade_maxima }
 
     const rsvpDdi = document.getElementById('rsvpDdi');
+    const rsvpTelefoneLinha = rsvpDdi.closest('.telefone-linha');
+    let numeroTravado = false;
 
     // Monta o número completo, já com o código do país: "+55 11987654321".
     // Se a pessoa digitar o número com "+" ou já com o código do país na frente,
@@ -482,12 +484,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const integrantes = grupo.integrantes?.length ? grupo.integrantes : [grupo.nome];
         integrantes.forEach((nome) => rsvpNomesContainer.appendChild(criarLinhaNome(nome)));
 
-        // O ingresso vai sempre para o WhatsApp digitado aqui (obrigatório se alguém vai)
+        // O ingresso vai para o WhatsApp digitado aqui (obrigatório se alguém vai).
+        // Convite já confirmado: o número fica travado, só os noivos trocam.
         rsvpWhatsapp.value = '';
         rsvpDdi.value = '55';
         rsvpWhatsapp.placeholder = '(11) 98765-4321';
         rsvpWhatsapp.closest('.form-group').classList.remove('error');
-        rsvpWhatsappHint.textContent = '';
+        numeroTravado = Boolean(grupo.ja_confirmado && grupo.whatsapp_final);
+        rsvpTelefoneLinha.style.display = numeroTravado ? 'none' : '';
+        rsvpWhatsappHint.textContent = numeroTravado
+            ? `O ingresso vai para o WhatsApp com final ${grupo.whatsapp_final}, usado na primeira confirmação. Para trocar o número, fale com os noivos.`
+            : '';
 
         rsvpEtapaBusca.style.display = 'none';
         rsvpForm.style.display = 'block';
@@ -511,8 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const whatsapp = montarWhatsapp(rsvpWhatsapp.value);
         const algumVai = nomes.some((n) => n.vai);
-        // O WhatsApp é obrigatório (exceto se ninguém vai)
-        const whatsappValido = whatsapp ? validateWhatsapp(whatsapp) : !algumVai;
+        // O WhatsApp é obrigatório (exceto se ninguém vai ou se o número já está travado)
+        const whatsappValido = numeroTravado || (whatsapp ? validateWhatsapp(whatsapp) : !algumVai);
         rsvpWhatsapp.closest('.form-group').classList.toggle('error', !whatsappValido);
 
         if (nomes.length === 0) {
@@ -534,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     grupo_id: rsvpGrupoId.value,
-                    whatsapp: whatsapp || undefined,
+                    whatsapp: numeroTravado ? undefined : whatsapp || undefined,
                     nomes
                 })
             });
