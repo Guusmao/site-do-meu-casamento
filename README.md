@@ -32,14 +32,11 @@ site-casamento/
 │       ├── branding/
 │       │   └── logo-oficial.png.png
 │       ├── gallery/
-│       │   ├── gallery-bouquet.png
-│       │   ├── gallery-cake.png
-│       │   ├── gallery-rings.png
-│       │   └── gallery-table.png
+│       │   └── casal-auditorio.jpg (e demais fotos .jpg)
 │       ├── hero/
 │       │   └── hero-bg.png
 │       └── story/
-│           └── couple-story.png
+│           └── casal-janeloes.jpg
 ├── css/
 │   ├── style.css
 │   └── envelope.css

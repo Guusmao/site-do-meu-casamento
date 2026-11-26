@@ -858,15 +858,25 @@ p {
 
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 24px;
+}
+
+/* Fotos em pé aparecem inteiras (2:3); a foto deitada ocupa a largura toda */
+.gallery-item.foto-larga {
+    grid-column: 1 / -1;
+    aspect-ratio: 21 / 9;
+}
+
+.gallery-item.foto-larga .gallery-img {
+    object-position: 50% 62%;
 }
 
 .gallery-item {
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 2 / 3;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
     cursor: pointer;
 }

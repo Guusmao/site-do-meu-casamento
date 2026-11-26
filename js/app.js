@@ -197,10 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lista de imagens da galeria
     const galleryImages = [
-        'assets/images/gallery/gallery-rings.png',
-        'assets/images/gallery/gallery-bouquet.png',
-        'assets/images/gallery/gallery-table.png',
-        'assets/images/gallery/gallery-cake.png'
+        'assets/images/gallery/casal-auditorio.jpg',
+        'assets/images/gallery/casal-abraco.jpg',
+        'assets/images/gallery/casal-contraluz.jpg',
+        'assets/images/gallery/maos-dadas.jpg',
+        'assets/images/gallery/casal-janelas.jpg',
     ];
     let currentImgIndex = 0;
 
