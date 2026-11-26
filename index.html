@@ -31,16 +31,18 @@
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/branding/apple-touch-icon.png">
 
-    <!-- Fontes do Google: Inter (textos) e Playfair Display (títulos elegantes) -->
+    <!-- Fontes do Google: Bodoni Moda (títulos, mesma família de letra do monograma) e Figtree (textos) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Figtree:wght@400;500;600&display=swap"
         rel="stylesheet">
 
     <!-- Arquivo de estilos principal -->
     <link rel="stylesheet" href="css/style.css?v=20261116">
     <link rel="stylesheet" href="css/envelope.css">
+    <!-- Refino visual (papel de convite + aquarela). Vem por último para sobrepor os estilos acima -->
+    <link rel="stylesheet" href="css/refino.css?v=20261126">
 
     <!-- Biblioteca de ícones Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -102,11 +104,13 @@
         <section class="hero-section" id="home">
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <p class="hero-subtitle">Salvem esta data • 08 de Fevereiro de 2027</p>
-                <h1 class="hero-title">Sarah & Felipe</h1>
-                <p class="hero-countdown-label">Faltam apenas:</p>
+                <img class="hero-monograma" src="assets/images/branding/selo-monograma.png" alt="" width="300" height="325">
+                <h1 class="hero-title">Sarah <span class="hero-e">&amp;</span> Felipe</h1>
+                <p class="hero-data">8 de fevereiro de 2027, às 16h30</p>
+                <p class="hero-local">Villa Garden Buffet, Fortaleza</p>
 
                 <!-- Contagem regressiva — os valores são atualizados pelo JavaScript -->
+                <p class="hero-countdown-label">Faltam</p>
                 <div class="countdown-container" id="countdown">
                     <div class="countdown-item">
                         <span class="countdown-value" id="days">00</span>
@@ -127,8 +131,8 @@
                 </div>
 
                 <div class="hero-actions">
-                    <a href="#rsvp" class="btn-primary" id="heroRsvpBtn">Confirmar Presença</a>
-                    <a href="#details" class="btn-secondary" id="heroDetailsBtn">Ver Detalhes</a>
+                    <a href="#rsvp" class="btn-primary" id="heroRsvpBtn">Confirmar presença</a>
+                    <a href="#details" class="btn-secondary" id="heroDetailsBtn">Ver detalhes</a>
                 </div>
             </div>
 
@@ -142,7 +146,6 @@
         <section class="story-section scroll-reveal" id="story">
             <div class="container">
                 <div class="section-header">
-                    <span class="section-subtitle">O Início de Tudo</span>
                     <h2 class="section-title">Nossa História</h2>
                     <div class="divider"></div>
                 </div>
@@ -154,7 +157,7 @@
                     </div>
                     <div class="story-text-wrapper">
                         <div class="story-chapter">
-                            <h3 class="story-chapter-title">O primeiro olhar</h3>
+                            <h3 class="story-chapter-title"><span class="story-num" aria-hidden="true">1</span>O primeiro olhar</h3>
                             <p class="story-paragraph">
                                 Tudo começou nos bastidores do time de louvor. Um amigo falou sobre ela — "é um partidão" —
                                 e logo a história de dois estava na boca de todo mundo. A boa intenção dos amigos quase os
@@ -163,7 +166,7 @@
                             </p>
                         </div>
                         <div class="story-chapter">
-                            <h3 class="story-chapter-title">O gesto que cativou</h3>
+                            <h3 class="story-chapter-title"><span class="story-num" aria-hidden="true">2</span>O gesto que cativou</h3>
                             <p class="story-paragraph">
                                 Naquele mesmo retiro, em um dia de muito calor, ela trouxe água para ele depois do louvor.
                                 Um gesto simples — mas que ficou. Depois disso, vieram as conversas diárias, a aproximação,
@@ -172,7 +175,7 @@
                             </p>
                         </div>
                         <div class="story-chapter">
-                            <h3 class="story-chapter-title">O pedido de namoro</h3>
+                            <h3 class="story-chapter-title"><span class="story-num" aria-hidden="true">3</span>O pedido de namoro</h3>
                             <p class="story-paragraph">
                                 Um mês depois, ele a levou até uma cafeteria. Com a ajuda de um amigo de confiança — que
                                 ficou do lado de fora segurando as flores — pediu licença, saiu "para o banheiro" e voltou
@@ -181,7 +184,7 @@
                             </p>
                         </div>
                         <div class="story-chapter">
-                            <h3 class="story-chapter-title">O pedido de casamento</h3>
+                            <h3 class="story-chapter-title"><span class="story-num" aria-hidden="true">4</span>O pedido de casamento</h3>
                             <p class="story-paragraph">
                                 Um ano e meio depois, ele planejou cada detalhe: fotógrafos escondidos, flores, e uma praia
                                 ao pôr do sol. Mas a aliança no bolso quase foi descoberta antes da hora — ela tocou sem
@@ -200,7 +203,6 @@
         <section class="details-section scroll-reveal" id="details">
             <div class="container">
                 <div class="section-header">
-                    <span class="section-subtitle">Como Chegar e Informações</span>
                     <h2 class="section-title">O Grande Dia</h2>
                     <div class="divider"></div>
                 </div>
@@ -215,6 +217,8 @@
                         <p class="details-time"><i data-lucide="clock" class="inline-icon"></i> 16:30 • 08/02/2027</p>
                         <p class="details-location-name">Villa Garden Buffet</p>
                         <p class="details-address">Rua Dr Rodrigo Codes Sandoval - 76 - Maraponga, Fortaleza, Brazil</p>
+                        <a class="btn-card-action" href="https://www.google.com/maps/search/?api=1&amp;query=Villa+Garden+Buffet+Rua+Dr+Rodrigo+Codes+Sandoval+76+Fortaleza"
+                            target="_blank" rel="noopener noreferrer">Abrir no mapa <i data-lucide="map-pin" class="btn-icon-right"></i></a>
                     </div>
 
                     <div class="details-map">
@@ -236,11 +240,12 @@
                         <div class="color-palette-suggestion">
                             <span class="palette-label">Cores reservadas (por favor, evite):</span>
                             <div class="palette-colors">
-                                <div class="color-swatch sw-dusty" title="Amarelo"></div>
-                                <div class="color-swatch sw-champagne" title="Amarelo claro"></div>
-                                <div class="color-swatch sw-sage" title="Azul"></div>
-                                <div class="color-swatch sw-navy" title="Azul lavanda"></div>
-                                <div class="color-swatch sw-taupe" title="Azul claro"></div>
+                                <figure class="swatch-item"><div class="color-swatch sw-dusty"></div><figcaption>Amarelo</figcaption></figure>
+                                <figure class="swatch-item"><div class="color-swatch sw-champagne"></div><figcaption>Amarelo claro</figcaption></figure>
+                                <figure class="swatch-item"><div class="color-swatch sw-sage"></div><figcaption>Azul</figcaption></figure>
+                                <figure class="swatch-item"><div class="color-swatch sw-navy"></div><figcaption>Azul lavanda</figcaption></figure>
+                                <figure class="swatch-item"><div class="color-swatch sw-taupe"></div><figcaption>Azul claro</figcaption></figure>
+                                <figure class="swatch-item swatch-noiva"><div class="color-swatch sw-branco"></div><figcaption>Branco e off-white</figcaption></figure>
                             </div>
                             <small class="palette-warning">* Essas cores serão usadas pelos padrinhos, damas de honra e
                                 pais dos noivos. Pedimos também a gentileza de evitar roupas na cor branca ou
@@ -255,7 +260,6 @@
         <section class="gallery-section scroll-reveal" id="gallery">
             <div class="container">
                 <div class="section-header">
-                    <span class="section-subtitle">Registros de Amor</span>
                     <h2 class="section-title">Nossa Galeria</h2>
                     <div class="divider"></div>
                 </div>
@@ -307,7 +311,7 @@
         <section class="rsvp-section scroll-reveal" id="rsvp">
             <div class="container">
                 <div class="section-header">
-                    <span class="section-subtitle">Confirme sua Presença</span>
+                    <h2 class="section-title">Confirme sua Presença</h2>
 
                     <div class="divider"></div>
                     <p class="section-intro">Por favor, confirme sua presença até o dia <strong>08 de Janeiro de
@@ -393,7 +397,6 @@
         <section class="registry-section scroll-reveal" id="registry">
             <div class="container">
                 <div class="section-header">
-                    <span class="section-subtitle">Com Carinho</span>
                     <h2 class="section-title">Lista de Presentes</h2>
                     <div class="divider"></div>
                     <p class="section-intro">Sua presença é o nosso maior presente! Mas, se quiser nos presentear,
@@ -413,7 +416,6 @@
         <section class="guestbook-section scroll-reveal" id="guestbook">
             <div class="container">
                 <div class="section-header">
-                    <span class="section-subtitle">Carinho dos Convidados</span>
                     <h2 class="section-title">Mural de Recados</h2>
                     <div class="divider"></div>
                     <p class="section-intro">Deixe seus votos de felicidade, conselhos amorosos ou simplesmente uma
@@ -458,8 +460,9 @@
     <footer class="footer-container">
         <div class="footer-wave"></div>
         <div class="footer-content">
+            <img class="footer-monograma" src="assets/images/branding/selo-monograma.png" alt="Monograma S e F" width="300" height="325" loading="lazy">
             <h2 class="footer-logo">Sarah & Felipe</h2>
-            <p class="footer-date">08 de Fevereiro de 2027 • Fortaleza, CE</p>
+            <p class="footer-date">8 de fevereiro de 2027, Fortaleza</p>
             <p class="footer-quote">"O amor tudo sofre, tudo crê, tudo espera, tudo suporta."</p>
             <div class="footer-divider"></div>
             <p class="footer-copyright">Desenvolvido por Felipe Gusmão</p>
