@@ -858,18 +858,18 @@ p {
 
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 24px;
 }
 
 /* Fotos em pé aparecem inteiras (2:3); a foto deitada ocupa a largura toda */
 .gallery-item.foto-larga {
     grid-column: 1 / -1;
-    aspect-ratio: 21 / 9;
+    aspect-ratio: 16 / 9;
 }
 
 .gallery-item.foto-larga .gallery-img {
-    object-position: 50% 62%;
+    object-position: 50% 58%;
 }
 
 .gallery-item {
@@ -1997,11 +1997,13 @@ p {
     }
     
     .gallery-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
     }
 
-    .gallery-item {
-        min-height: 280px;
+    /* No celular: fotos em pé em 2 colunas e a deitada inteira na largura toda */
+    .gallery-item.foto-larga {
+        aspect-ratio: 1072 / 854;
     }
     
     .pix-visual-container {
