@@ -369,16 +369,22 @@ h1, h2, h3, h4 {
 /* ---------- Galeria: colunas que aceitam fotos em pé ou deitadas ---------- */
 .gallery-section { background-color: var(--papel); }
 .gallery-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
 }
-/* Retrato 4:5 recortado no centro: qualquer foto nova entra alinhada */
+/* Fotos em pé inteiras (2:3), sem cortar */
 .gallery-item {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 2 / 3;
     border-radius: 2px;
     box-shadow: none;
     min-height: 0;
 }
+/* A foto deitada abre a galeria ocupando a largura toda */
+.gallery-item.foto-larga {
+    grid-column: 1 / -1;
+    aspect-ratio: 21 / 9;
+}
+.gallery-item.foto-larga .gallery-img { object-position: 50% 62%; }
 .gallery-overlay { background-color: rgba(47, 66, 101, 0.35); }
 
 /* ---------- Confirmação ---------- */
@@ -524,6 +530,7 @@ h1, h2, h3, h4 {
 
     .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .gallery-item { min-height: 0; }
+    .gallery-item.foto-larga { aspect-ratio: 3 / 2; }
 }
 
 @media (max-width: 480px) {
